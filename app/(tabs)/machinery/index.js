@@ -1,151 +1,132 @@
-import React, { useState } from "react";
+import { useCallback, useState, memo, useEffect } from "react";
 import {
+  Linking,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  SectionList,
+  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-// import { useNavigation } from "@react-navigation/native";
-import { useNavigation } from "expo-router";
 import {
   FadingView,
   Header,
   LargeHeader,
   SectionListWithHeaders,
+  ScrollViewWithHeaders,
 } from "@codeherence/react-native-header";
 import { StatusBar } from "expo-status-bar";
 import { Feather } from "@expo/vector-icons";
 import Animated, {
-  Extrapolate,
+  Extrapolation,
   interpolate,
   useAnimatedStyle,
   useDerivedValue,
 } from "react-native-reanimated";
+import { BlurView } from "expo-blur";
+import MachineryCard from "../../../components/Home/MachineryCard";
+import machinery from "../../../db/machinery";
+import { useRouter } from "expo-router";
+import StyledSearchBar from "../../../components/Home/StyledSearchBar";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 
-import MachineryCard from "../../../components/Home/MachineryCard.js";
+const canUseBlurView =
+  Platform.OS === "ios" ||
+  (Platform.OS === "android" && Number(Platform.Version) >= 31);
 
-const VERTICAL_SPACING = 12;
 const ROOT_HORIZONTAL_PADDING = 12;
-const TWITTER_PRIMARY_COLOR = "#1d9bf0";
-const DISABLED_COLOR = "rgba(255, 255, 255, 0.6)";
-const AVATAR_START_SCALE = 1;
-const AVATAR_END_SCALE = 0.5;
-const AVATAR_SIZE_VALUE = 64;
-const BANNER_BOTTOM_HEIGHT_ADDITION = AVATAR_SIZE_VALUE;
+const BLUE = "#1d9bf0";
+const DISABLED_COLOR = "rgba(255, 255, 255, 0.6)"; //White with 60% opacity
+const LIGHT_MODE_TEXT_COLOR = "#000"; //Black
+const LIGHT_MODE_BACKGROUND_COLOR = "#fff"; //White
+const DARK_MODE_TEXT_COLOR = "#fff"; //White
+const DARK_MODE_BACKGROUND_COLOR = "#000"; //Black
+const TRANSPARENT = "transparent";
+const LIGHT_GRAY = "lightgray";
+const DARK_BLUR_VIEW_BG = "rgba(0, 0, 0, 0.6)";
+const WARNING_COLOR = "rgba(255, 0, 0, 0.2)";
 
 const HeaderComponent = ({ showNavBar, scrollY }) => {
-  const navigation = useNavigation();
   const { left, right } = useSafeAreaInsets();
+  const router = useRouter();
 
-  const profileImageScale = useDerivedValue(() => {
-    return interpolate(
-      scrollY.value,
-      [0, BANNER_BOTTOM_HEIGHT_ADDITION],
-      [AVATAR_START_SCALE, AVATAR_END_SCALE],
-      Extrapolate.CLAMP
-    );
-  });
-
-  // This allows the profile container to translate as the user scrolls.
-  const profileContainerTranslationStyle = useAnimatedStyle(() => {
-    const translateY = -scrollY.value + BANNER_BOTTOM_HEIGHT_ADDITION / 2;
-
-    return { transform: [{ translateY }] };
-  });
-
-  // Once the profile image has been scaled down, we allow the profile container to be
-  // hidden behind the banner. This is done by setting the zIndex to -1.
-  const rootProfileRowZIndexStyle = useAnimatedStyle(() => {
-    return { zIndex: profileImageScale.value <= AVATAR_END_SCALE ? -1 : 1 };
-  });
-
-  // Slow down the avatar's translation to allow it to scale down and
-  // still stay at its position.
-  const profileImageScaleStyle = useAnimatedStyle(() => {
-    const profileImageTranslationY = interpolate(
-      profileImageScale.value,
-      [AVATAR_START_SCALE, AVATAR_END_SCALE],
-      [0, AVATAR_SIZE_VALUE / 2],
-      Extrapolate.CLAMP
+  const blurStyle = useAnimatedStyle(() => {
+    const blurOpacity = interpolate(
+      Math.abs(scrollY.value),
+      [0, 40],
+      [0, 1],
+      Extrapolation.CLAMP
     );
 
-    return {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      width: "50%",
-      transform: [
-        { scale: profileImageScale.value },
-        { translateY: profileImageTranslationY },
-      ],
-    };
+    return { opacity: blurOpacity };
   });
-
   return (
     <View style={styles.smallHeaderContainer}>
+      <Animated.View style={StyleSheet.absoluteFill}>
+        <Animated.View>
+          <View>
+            {canUseBlurView ? (
+              <Animated.View
+                style={[StyleSheet.absoluteFill, styles.blurView, blurStyle]}
+              >
+                <BlurView
+                  style={StyleSheet.absoluteFill}
+                  intensity={50}
+                  tint="dark"
+                />
+              </Animated.View>
+            ) : (
+              <Animated.View
+                style={[
+                  StyleSheet.absoluteFill,
+                  styles.blurView,
+                  styles.androidBlurViewBg,
+                  blurStyle,
+                ]}
+              />
+            )}
+          </View>
+        </Animated.View>
+      </Animated.View>
+
       <Header
         showNavBar={showNavBar}
         headerCenterFadesIn={false}
         headerStyle={styles.headerStyle}
         noBottomBorder
-        // headerRight={
-        //   <>
-        //     <TouchableOpacity style={styles.backButtonContainer}>
-        //       <Feather color="white" name="more-horizontal" size={18} />
-        //     </TouchableOpacity>
-        //     <TouchableOpacity style={styles.backButtonContainer}>
-        //       <Feather color="white" name="search" size={18} />
-        //     </TouchableOpacity>
-        //   </>
-        // }
-        // headerRightStyle={[
-        //   styles.headerRightStyle,
-        //   { paddingLeft: Math.max(right, ROOT_HORIZONTAL_PADDING) },
-        // ]}
-        // headerLeft={
-        //   <>
-        //     {/* <TouchableOpacity
-        //       onPress={() => navigation.canGoBack() && navigation.goBack()}
-        //       style={styles.backButtonContainer}
-        //     >
-        //       <Feather color="white" name={"arrow-left"} size={18} />
-        //     </TouchableOpacity> */}
-        //     <FadingView opacity={showNavBar}>
-        //       <Text style={styles.navBarTitle}>Kutay Kurt</Text>
-        //       <Text style={styles.disabledSmallText}>3rd Engineer</Text>
-        //     </FadingView>
-        //   </>
-        // }
-        // headerLeftStyle={[
-        //   styles.headerLeftStyle,
-        //   { paddingLeft: Math.max(left, ROOT_HORIZONTAL_PADDING) },
-        // ]}
-      />
-
-      <Animated.View
-        style={[styles.profileContainer, rootProfileRowZIndexStyle]}
-      >
-        <Animated.View
-          style={[
-            styles.profileFollowContainer,
-            {
-              alignItems: "center",
-              justifyContent: "flex-start",
-            },
-            profileContainerTranslationStyle,
-          ]}
-        >
-          <Animated.View style={profileImageScaleStyle}>
-            <Feather name="tool" color="white" size={36} />
-            <Text style={styles.title}>Kutay Kurt</Text>
-            <TouchableOpacity style={styles.pillButton}>
-              <Text style={styles.badge}>3rd Engineer</Text>
+        headerRight={
+          <>
+            <TouchableOpacity style={styles.backButtonContainer}>
+              <Feather color="white" name="more-horizontal" size={18} />
             </TouchableOpacity>
-          </Animated.View>
-        </Animated.View>
-      </Animated.View>
+            <TouchableOpacity
+              style={styles.backButtonContainer}
+              onPress={() => {
+                //open the search modal
+                router.navigate("/modal");
+              }}
+            >
+              <Feather color="white" name="search" size={18} />
+            </TouchableOpacity>
+          </>
+        }
+        headerRightStyle={[
+          styles.headerRightStyle,
+          { paddingLeft: Math.max(right, ROOT_HORIZONTAL_PADDING) },
+        ]}
+        headerLeft={
+          <>
+            <FadingView opacity={showNavBar}>
+              <Text style={styles.navBarTitle}>Kutay Kurt</Text>
+              <Text style={styles.disabledSmallText}>3rd Engineer</Text>
+            </FadingView>
+          </>
+        }
+        headerLeftStyle={[
+          styles.headerLeftStyle,
+          { paddingLeft: Math.max(left, ROOT_HORIZONTAL_PADDING) },
+        ]}
+      />
     </View>
   );
 };
@@ -163,73 +144,38 @@ const LargeHeaderComponent = () => {
         },
       ]}
     >
-      <View style={styles.dataRow}>
-        <Feather name="sun" color={DISABLED_COLOR} size={18} />
-        <Text style={styles.disabledText}>
-          It's a cloudy morning in Trieste, Sir!
-        </Text>
+      <View style={styles.profileHandleContainer}>
+        <Text style={styles.title}>Welcome back,</Text>
+        <Text style={styles.disabledText}>Kutay Kurt | 3rd Engineer</Text>
+        <View style={styles.separator} />
+        <View style={styles.headerWarningListContainer}>
+          <View style={styles.headerWarningContainer}>
+            <Feather color="red" name="alert-triangle" size={18} />
+            <Text style={styles.text}>
+              There is a <Text style={styles.primaryText}>main engine</Text>{" "}
+              issue. Click <Text style={styles.primaryText}>here</Text> for more
+              information.
+            </Text>
+          </View>
+          <View style={styles.headerWarningContainer}>
+            <Feather color="red" name="alert-triangle" size={18} />
+            <Text style={styles.text}>
+              There is a <Text style={styles.primaryText}>main engine</Text>{" "}
+              issue. Click <Text style={styles.primaryText}>here</Text> for more
+              information.
+            </Text>
+          </View>
+        </View>
       </View>
     </LargeHeader>
   );
 };
 
-const SomeComponent = ({ index }) => {
-  return (
-    <View style={styles.children}>
-      <Text style={styles.text}>{index}</Text>
-    </View>
-  );
-};
+const MemoizedComponent = memo(MachineryCard, () => true);
 
-const MemoizedComponent = React.memo(MachineryCard, () => true);
-
-const HomeTabScreen = () => {
+const MachineryScreen = () => {
   const { bottom } = useSafeAreaInsets();
-  const [activeTab, setActiveTab] = useState(0);
-
-  const data = [
-    {
-      title: "Troubleshooting",
-      data: [
-        {
-          imageSource:
-            "https://res.cloudinary.com/seably/image/upload/ar_16:10,c_fill,q_auto,w_800/kyfxupuie453gihrphwb.jpeg",
-          name: "Separator",
-          description: "Separator troubleshoooting",
-        },
-        {
-          imageSource:
-            "https://detegasa.com/wp-content/uploads/2015/10/incinerator.png",
-          name: "Incinerator",
-          description: "Incinerator troubleshoooting",
-        },
-        {
-          imageSource:
-            "https://miro.medium.com/v2/resize:fit:425/0*TYAMHH2LF-QRfAkG.png",
-          name: "Oily Water Separator",
-          description: "Oily Water Separator troubleshoooting",
-        },
-        {
-          imageSource:
-            "https://res.cloudinary.com/seably/image/upload/ar_16:10,c_fill,q_auto,w_800/kyfxupuie453gihrphwb.jpeg",
-          name: "Separator",
-          description: "Separator troubleshoooting",
-        },
-        {
-          imageSource:
-            "https://detegasa.com/wp-content/uploads/2015/10/incinerator.png",
-          name: "Incinerator",
-          description: "Incinerator troubleshoooting",
-        },
-        {
-          imageSource:
-            "https://miro.medium.com/v2/resize:fit:425/0*TYAMHH2LF-QRfAkG.png",
-          name: "Oily Water Separator",
-          description: "Oily Water Separator troubleshoooting",
-        },
-      ],
-    },
-  ];
+  const tabBarHeight = useBottomTabBarHeight();
 
   return (
     <>
@@ -237,19 +183,23 @@ const HomeTabScreen = () => {
       <SectionListWithHeaders
         HeaderComponent={HeaderComponent}
         LargeHeaderComponent={LargeHeaderComponent}
-        sections={data}
+        sections={machinery}
         disableAutoFixScroll
         ignoreLeftSafeArea
         ignoreRightSafeArea
         headerFadeInThreshold={0.2}
         disableLargeHeaderFadeAnim
-        style={styles.container}
-        contentContainerStyle={[
-          styles.contentContainer,
-          { paddingBottom: bottom },
+        style={[
+          styles.container,
+          {
+            // marginBottom: tabBarHeight + 20
+          },
         ]}
+        contentContainerStyle={[styles.contentContainer]}
+        contentInsetAdjustmentBehavior="automatic"
         containerStyle={styles.rootContainer}
-        renderItem={({ item, index }) => (
+        contentInset={{ bottom }}
+        renderItem={({ item }) => (
           <MemoizedComponent
             name={item.name}
             description={item.description}
@@ -258,97 +208,78 @@ const HomeTabScreen = () => {
         )}
         stickySectionHeadersEnabled
         renderSectionHeader={() => (
-          <View style={styles.tabBarContainer}>
-            {["Troubleshoot", "Live Data"].map((tab, index) => (
-              <TouchableOpacity
-                key={`option-${index}`}
-                style={styles.tabButton}
-                onPress={() => setActiveTab(index)}
-              >
-                <Text style={styles.tabText}>{tab}</Text>
-                {activeTab === index && <View style={styles.blueUnderline} />}
-              </TouchableOpacity>
-            ))}
+          <View style={styles.listHeaderContainer}>
+            <View style={styles.listHeaderTopContainer}>
+              <StyledSearchBar placeholder="Search machinery..." />
+            </View>
           </View>
         )}
       />
+      {/* 
+      //add a bottom padding to the screen to prevent the last item from being hidden behind the tab bar 
+      <View style={{ height: tabBarHeight }} />
+      */}
     </>
   );
 };
 
-export default HomeTabScreen;
+export default MachineryScreen;
 
 const styles = StyleSheet.create({
-  children: { marginTop: 16, paddingHorizontal: 16 },
-  title: { fontSize: 24, fontWeight: "bold", color: "white", marginLeft: 12 },
-  navBarTitle: { fontSize: 16, fontWeight: "bold", color: "white" },
+  title: { fontSize: 24, fontWeight: "bold", color: DARK_MODE_TEXT_COLOR },
+  navBarTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: DARK_MODE_TEXT_COLOR,
+  },
   largeHeaderStyle: {
     flexDirection: "column",
     gap: 12,
-    marginTop:
-      AVATAR_SIZE_VALUE / 2 + VERTICAL_SPACING + BANNER_BOTTOM_HEIGHT_ADDITION,
   },
   backButtonContainer: {
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    backgroundColor: DARK_MODE_BACKGROUND_COLOR,
     borderRadius: 100,
     padding: 7,
     justifyContent: "center",
     alignItems: "center",
   },
-  headerStyle: {
-    backgroundColor: "transparent",
-  },
-  smallHeaderContainer: {
-    position: "relative",
-    zIndex: 1,
-  },
+  headerStyle: { backgroundColor: TRANSPARENT },
+  smallHeaderContainer: { position: "relative", zIndex: 1 },
   headerRightStyle: { gap: 6, paddingLeft: 12 },
   headerLeftStyle: { gap: 12, paddingLeft: 12 },
   blurView: { zIndex: 1 },
-  container: { flex: 1, backgroundColor: "#000" },
-  contentContainer: { backgroundColor: "#000", flexGrow: 1 },
-  text: { color: "#fff" },
+  container: {
+    flex: 1,
+    backgroundColor: DARK_MODE_BACKGROUND_COLOR,
+  },
+  contentContainer: {
+    backgroundColor: DARK_MODE_BACKGROUND_COLOR,
+    flexGrow: 1,
+  },
+  text: { color: DARK_MODE_TEXT_COLOR },
+  primaryText: { color: BLUE },
   rootContainer: {
-    backgroundColor: "#000",
-  },
-  profileFollowContainer: {
-    position: "absolute",
-    left: 12,
-    right: 12,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-end",
-  },
-  badge: { fontSize: 12, fontWeight: "600" },
-  pillButton: {
-    paddingVertical: 3,
-    paddingHorizontal: 16,
-    backgroundColor: "#fff",
-    borderRadius: 200,
-    marginLeft: 12,
+    backgroundColor: DARK_MODE_BACKGROUND_COLOR,
+    flex: 1,
   },
   disabledSmallText: { color: DISABLED_COLOR, fontSize: 12 },
   disabledText: { color: DISABLED_COLOR, fontSize: 14 },
-  profileContainer: {
-    paddingHorizontal: 12,
+  separator: { height: 1, backgroundColor: LIGHT_GRAY, marginVertical: 12 },
+  profileHandleContainer: { gap: 4 },
+  listHeaderContainer: {
+    backgroundColor: DARK_MODE_BACKGROUND_COLOR,
   },
-  tabBarContainer: {
+  listHeaderTopContainer: {},
+  androidBlurViewBg: { backgroundColor: DARK_BLUR_VIEW_BG },
+  headerWarningContainer: {
+    backgroundColor: WARNING_COLOR,
+    borderRadius: 8,
+    padding: 12,
     flexDirection: "row",
+    gap: 8,
     alignItems: "center",
-    backgroundColor: "#000",
   },
-  tabButton: { flex: 1, justifyContent: "center", alignItems: "center" },
-  tabText: {
-    color: "white",
-    fontSize: 14,
-    fontWeight: "600",
-    paddingVertical: 12,
+  headerWarningListContainer: {
+    gap: 8,
   },
-  blueUnderline: {
-    height: 2,
-    width: "50%",
-    backgroundColor: TWITTER_PRIMARY_COLOR,
-    borderRadius: 4,
-  },
-  dataRow: { flexDirection: "row", gap: 4, alignItems: "center" },
 });

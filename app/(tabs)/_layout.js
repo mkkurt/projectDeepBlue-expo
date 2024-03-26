@@ -1,67 +1,78 @@
 import React from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { Link, Tabs, useNavigation } from "expo-router";
-import { Pressable, StyleSheet, Text, TouchableOpacity } from "react-native";
-import { Feather } from "@expo/vector-icons";
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
+import { Tabs } from "expo-router";
+
 function TabBarIcon(props) {
+  // eslint-disable-next-line react-native/no-inline-styles
   return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
 }
 
 export default function TabLayout() {
-  const navigation = useNavigation();
   return (
-    <Tabs screenOptions={{}}>
+    <Tabs
+      safeAreaInsets={{
+        bottom: 0,
+        left: 0,
+        right: 0,
+        top: 0,
+      }}
+      screenOptions={{
+        tabBarShowLabel: false,
+        tabBarBackground: () => null,
+        tabBarActiveTintColor: "white",
+        tabBarInactiveTintColor: "black",
+        tabBarStyle: {
+          borderRadius: 30,
+          backgroundColor: "#6495ED",
+          borderTopWidth: 0,
+          position: "absolute",
+          bottom: 20,
+          left: 20,
+          right: 20,
+          elevation: 8, // Add shadow on Android
+          shadowOpacity: 0.3, // Add shadow on iOS
+          shadowOffset: { width: 0, height: 4 },
+          shadowRadius: 4,
+          display: "flex",
+          height: 60,
+          marginHorizontal: 50,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+        },
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
           href: null,
-          title: "Tab Home",
-          headerShown: false,
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="machinery/index"
+        name="machinery"
         options={{
           title: "Tab Machinery",
           headerShown: false,
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
-          title: "Settings",
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          title: "Tab Settings",
+          tabBarIcon: ({ color }) => <TabBarIcon name="cog" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="[machineryId]"
+        name="ai/index"
         options={{
-          href: null,
+          title: "Tab AI",
           headerShown: false,
-          title: "Machinery",
-          headerLeft: () => (
-            //go back
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              style={styles.backButtonContainer}
-            >
-              <Feather name="arrow-left" size={24} color="white" />
-            </TouchableOpacity>
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="android" color={color} />
           ),
         }}
       />
     </Tabs>
   );
 }
-const styles = StyleSheet.create({
-  backButtonContainer: {
-    backgroundColor: "black",
-    borderRadius: 100,
-    padding: 7,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});

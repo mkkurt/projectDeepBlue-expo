@@ -1,16 +1,12 @@
 import React from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
-import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
+import { useRouter } from "expo-router";
 
 const MachineryCard = ({ name, description, imageSource }) => {
   const router = useRouter();
-  const navigation = useNavigation();
-  const params = useLocalSearchParams();
 
   const handlePress = () => {
-    console.log("Pressed");
-    navigation.navigate("[machineryId]", { machineryId: name });
-    console.log(`navigate to /${name}`);
+    router.navigate(`machinery/${name}`);
   };
   return (
     <TouchableOpacity

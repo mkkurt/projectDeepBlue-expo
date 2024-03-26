@@ -1,29 +1,13 @@
 import React from "react";
-import {
-  FlatList,
-  Text,
-  View,
-  StyleSheet,
-  Pressable,
-  Keyboard,
-} from "react-native";
-
+import { FlatList, Text, StyleSheet, Pressable } from "react-native";
 import { useRouter, useGlobalSearchParams } from "expo-router";
-import { useEffect } from "react";
 
 const ProblemList = ({ problems }) => {
   const router = useRouter();
   const { machineryId } = useGlobalSearchParams();
 
   const handlePress = (problem) => {
-    router.push({
-      pathname: "/[machineryId]/problem/[problemId]",
-      params: {
-        machineryId: machineryId,
-        problemId: problem.name,
-      },
-    });
-    console.log(`navigate to /${machineryId}/problem/${problem.name}`);
+    router.navigate(`machinery/${machineryId}/${problem.name}`);
   };
   const renderProblemItem = ({ item, index }) => {
     return (

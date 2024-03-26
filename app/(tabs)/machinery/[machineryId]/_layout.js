@@ -20,17 +20,10 @@ export default function StackLayout() {
         ),
       }}
     >
+      <Stack.Screen name="index" options={{}} />
       <Stack.Screen
-        name="index"
+        name="[problemId]"
         options={{
-          headerShown: true,
-          headerTitle: "Problems",
-        }}
-      />
-      <Stack.Screen
-        name="problem"
-        options={{
-          title: "Problem",
           headerShown: false,
         }}
       />
