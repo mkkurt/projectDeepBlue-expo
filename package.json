@@ -17,6 +17,8 @@
     "@devvie/bottom-sheet": "^0.3.0",
     "@expo/vector-icons": "^14.0.0",
     "@react-navigation/native": "^6.0.2",
+    "@tanstack/react-query": "^5.28.8",
+    "axios": "^1.6.8",
     "eslint-plugin-react": "^7.34.1",
     "expo": "~50.0.11",
     "expo-blur": "~12.9.2",

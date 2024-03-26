@@ -57,13 +57,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="settings"
-        options={{
-          title: "Tab Settings",
-          tabBarIcon: ({ color }) => <TabBarIcon name="cog" color={color} />,
-        }}
-      />
-      <Tabs.Screen
         name="ai/index"
         options={{
           title: "Tab AI",
@@ -71,6 +64,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <TabBarIcon name="android" color={color} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: "Tab Settings",
+          tabBarIcon: ({ color }) => <TabBarIcon name="cog" color={color} />,
         }}
       />
     </Tabs>
