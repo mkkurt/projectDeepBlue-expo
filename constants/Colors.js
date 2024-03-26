@@ -1,5 +1,7 @@
 const Colors = {
   light: {
+    primary: "#2B49C3",
+    secondary: "#f0f0f0",
     text: "#000",
     background: "#fff",
     tint: "#2B49C3",
@@ -16,6 +18,8 @@ const Colors = {
     },
   },
   dark: {
+    primary: "#2B49C3",
+    secondary: "#f0f0f0",
     text: "#fff",
     background: "#000",
     tint: "#2B49C3",

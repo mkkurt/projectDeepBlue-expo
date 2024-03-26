@@ -10,7 +10,6 @@ A work-in-progress mobile application for Marine Engineers onboard, made with Re
 - [@tanstack/react-query](https://tanstack.com/query/latest)
 - [codeherence@react-native-header](https://github.com/codeherence/react-native-header)
 - [@devvie/bottom-sheet](https://www.npmjs.com/package/@devvie/bottom-sheet)
--
 
 ## Usage
 

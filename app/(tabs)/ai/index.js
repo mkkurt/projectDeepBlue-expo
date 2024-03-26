@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
   StyleSheet,
+  Button,
 } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -42,9 +43,20 @@ const ChatScreen = () => {
     },
   });
 
-  //if a specific mutation is happening, add a loading message to the chat with a specific key.
-  //if that specific mutation is successful, fill that message with the response data.
-  //if that specific mutation fails, fill that message with the error message.
+  const renderSources = ({ item }) => {
+    return (
+      <View key={item.doc_id} style={styles.sourceContainer}>
+        <Text style={styles.scoreHeader}>
+          Page {item.document.doc_metadata.page_label}
+          {"\n"}
+          Score: {item.score.toFixed(2) * 100}%
+        </Text>
+        <Text style={styles.scoreText}>
+          {item?.document?.doc_metadata?.window}
+        </Text>
+      </View>
+    );
+  };
 
   useEffect(() => {
     console.log("useEffect initiated for completionMutation");
@@ -71,6 +83,8 @@ const ChatScreen = () => {
           role: "assistant",
           content: completionMutation.data.choices[0].message.content,
           created_at: new Date().toISOString(),
+          sources: completionMutation.data.choices[0].sources,
+          sourcesFolded: true,
         };
         return newMessages;
       });
@@ -136,6 +150,34 @@ const ChatScreen = () => {
         {/* {item.role === "assistant" && completionMutation.isPending && (
         <Text>...</Text>
       )} */}
+        {item.sources && (
+          <TouchableOpacity
+            onPress={() => {
+              setMessages((prevMessages) => {
+                const newMessages = [...prevMessages];
+                const sourceMessageIndex = newMessages.findIndex(
+                  (message) => message.created_at === item.created_at
+                );
+                newMessages[sourceMessageIndex] = {
+                  ...newMessages[sourceMessageIndex],
+                  sourcesFolded: !newMessages[sourceMessageIndex].sourcesFolded,
+                };
+                return newMessages;
+              });
+            }}
+          >
+            <Text style={styles.showMore}>
+              {item.sourcesFolded ? "Show more" : "Show less"}
+            </Text>
+          </TouchableOpacity>
+        )}
+        {item.sourcesFolded ? null : (
+          <FlatList
+            data={item.sources}
+            renderItem={renderSources}
+            keyExtractor={(item) => item.doc_id}
+          />
+        )}
       </View>
     );
   };
@@ -153,6 +195,7 @@ const ChatScreen = () => {
         keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
       >
         <View style={styles.container}>
+          <Button title="Clear" onPress={() => setMessages([])} />
           <FlatList data={messages} renderItem={renderMessage} />
           <View style={styles.inputContainer}>
             <TextInput
@@ -231,6 +274,28 @@ const styles = StyleSheet.create({
   },
   assistantMessageDate: {
     color: Colors.light.chat.assistantText,
+  },
+  sourceContainer: {
+    padding: 8,
+    backgroundColor: Colors.light.chat.assistant,
+    borderRadius: 10,
+    borderWidth: 1,
+    margin: 6,
+    width: "80%",
+    alignSelf: "flex-start",
+  },
+  scoreHeader: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: Colors.light.primary,
+  },
+  scoreText: {
+    fontSize: 12,
+    color: Colors.light.chat.assistantText,
+  },
+  showMore: {
+    color: Colors.light.primary,
+    textAlign: "center",
   },
 });
 
