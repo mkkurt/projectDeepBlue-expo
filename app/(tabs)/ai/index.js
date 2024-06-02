@@ -12,12 +12,10 @@ import {
   Button,
 } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import fetchChatCompletion from "@/services/chatService";
 import Colors from "@/constants/Colors";
-
-// Color constants
-const SEND_BUTTON_TEXT_COLOR = "blue";
+import Message from "@/components/Ai/Message";
 
 const ChatScreen = () => {
   const [inputText, setInputText] = useState("");
@@ -43,20 +41,16 @@ const ChatScreen = () => {
     },
   });
 
-  const renderSources = ({ item }) => {
-    return (
-      <View key={item.doc_id} style={styles.sourceContainer}>
-        <Text style={styles.scoreHeader}>
-          Page {item.document.doc_metadata.page_label}
-          {"\n"}
-          Score: {item.score.toFixed(2) * 100}%
-        </Text>
-        <Text style={styles.scoreText}>
-          {item?.document?.doc_metadata?.window}
-        </Text>
-      </View>
-    );
-  };
+  //scroll to the end of the list when new messages are added.
+  const flatListRef = React.useRef();
+  useEffect(() => {
+    if (flatListRef.current) {
+      flatListRef.current.scrollToEnd({ animated: true });
+    }
+  }, [messages]);
+
+  //prevent the user from sending multiple messages in a row. The assistant should respond first.
+  //if the last message is from the user, disable the input.
 
   useEffect(() => {
     console.log("useEffect initiated for completionMutation");
@@ -118,85 +112,22 @@ const ChatScreen = () => {
     }
   }, [messages]);
 
-  const renderMessage = ({ item }) => {
-    return (
-      <View
-        style={[
-          styles.messageContainer,
-          item.role === "assistant" && styles.assistantMessageContainer,
-        ]}
-      >
-        <Text
-          style={[
-            styles.messageContent,
-            item.role === "assistant" && styles.assistantMessageContent,
-          ]}
-        >
-          {item.content.trim()}
-        </Text>
-        <Text
-          style={[
-            styles.messageDate,
-            item.role === "assistant" && styles.assistantMessageDate,
-          ]}
-        >
-          {item.created_at
-            ? new Date(item.created_at).toLocaleTimeString([], {
-                minute: "2-digit",
-                second: "2-digit",
-              })
-            : ""}
-        </Text>
-        {/* {item.role === "assistant" && completionMutation.isPending && (
-        <Text>...</Text>
-      )} */}
-        {item.sources && (
-          <TouchableOpacity
-            onPress={() => {
-              setMessages((prevMessages) => {
-                const newMessages = [...prevMessages];
-                const sourceMessageIndex = newMessages.findIndex(
-                  (message) => message.created_at === item.created_at
-                );
-                newMessages[sourceMessageIndex] = {
-                  ...newMessages[sourceMessageIndex],
-                  sourcesFolded: !newMessages[sourceMessageIndex].sourcesFolded,
-                };
-                return newMessages;
-              });
-            }}
-          >
-            <Text style={styles.showMore}>
-              {item.sourcesFolded ? "Show more" : "Show less"}
-            </Text>
-          </TouchableOpacity>
-        )}
-        {item.sourcesFolded ? null : (
-          <FlatList
-            data={item.sources}
-            renderItem={renderSources}
-            keyExtractor={(item) => item.doc_id}
-          />
-        )}
-      </View>
-    );
-  };
-
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView
+      style={[styles.safeArea, { marginBottom: tabBarHeight + 30 }]}
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : null}
-        style={[
-          styles.container,
-          {
-            marginBottom: tabBarHeight,
-          },
-        ]}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
+        style={styles.container}
       >
         <View style={styles.container}>
           <Button title="Clear" onPress={() => setMessages([])} />
-          <FlatList data={messages} renderItem={renderMessage} />
+          <FlatList
+            data={messages}
+            renderItem={({ item }) => (
+              <Message item={item} setMessages={setMessages} />
+            )}
+          />
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
@@ -225,38 +156,16 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    // display: "flex",
-  },
-  messageContainer: {
-    padding: 8,
-    backgroundColor: Colors.light.chat.user,
-    borderRadius: 10,
-    borderWidth: 1,
-    margin: 6,
-    // display: "flex",
-    width: "80%",
-    alignSelf: "flex-end",
-  },
-  assistantMessageContainer: {
-    backgroundColor: Colors.light.chat.assistant,
-    alignSelf: "flex-start",
-  },
-  messageContent: {
-    color: Colors.light.chat.userText,
-  },
-  assistantMessageContent: {
-    color: Colors.light.chat.assistantText,
   },
   inputContainer: {
+    display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 10,
-    paddingBottom: 10,
   },
   input: {
     flex: 1,
     height: 40,
-    borderColor: Colors.light.border,
+    borderColor: Colors.light.primary,
     borderWidth: 1,
     borderRadius: 20,
     paddingHorizontal: 10,
@@ -265,37 +174,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   sendButtonText: {
-    color: SEND_BUTTON_TEXT_COLOR,
-  },
-  messageDate: {
-    fontSize: 10,
-    color: Colors.light.chat.userText,
-    textAlign: "right",
-  },
-  assistantMessageDate: {
-    color: Colors.light.chat.assistantText,
-  },
-  sourceContainer: {
-    padding: 8,
-    backgroundColor: Colors.light.chat.assistant,
-    borderRadius: 10,
-    borderWidth: 1,
-    margin: 6,
-    width: "80%",
-    alignSelf: "flex-start",
-  },
-  scoreHeader: {
-    fontSize: 16,
-    fontWeight: "bold",
     color: Colors.light.primary,
-  },
-  scoreText: {
-    fontSize: 12,
-    color: Colors.light.chat.assistantText,
-  },
-  showMore: {
-    color: Colors.light.primary,
-    textAlign: "center",
   },
 });
 

@@ -1,28 +1,33 @@
-import { SafeAreaView, StyleSheet } from "react-native";
+import { SafeAreaView, StyleSheet, Text } from "react-native";
 import { useEffect, useState } from "react";
 import { useGlobalSearchParams } from "expo-router";
-import problems from "../../../../db/fueloilseparator.js";
 import ProblemList from "@/components/Machinery/ProblemList.js";
 import { Stack } from "expo-router";
+import { useMachineryContext } from "../../../../state/AppProvider";
+// import {data } from "../../../../db/machinery";
+//import the data as the data[0] which is the first item in the array:
+import machinery from "../../../../db/machinery";
+const data = machinery[0].data;
 
 const MachineryProblemsScreen = () => {
-  const [filteredProblems, setFilteredProblems] = useState(problems);
   const { machineryId } = useGlobalSearchParams();
 
-  const machineName = machineryId;
-  useEffect(() => {
-    console.log("machineryId", machineryId);
-  }, [machineryId]);
+  const getMachineryById = (id) => {
+    return data.find((machineryItem) => machineryItem.id === id);
+  };
+
+  const machineryItem = getMachineryById(machineryId);
 
   return (
     <SafeAreaView style={styles.container}>
       <Stack.Screen
         options={{
           headerShown: true,
-          headerTitle: machineName,
+          headerTitle: machineryItem.name,
         }}
       />
-      <ProblemList problems={filteredProblems} />
+      {/* TODO: investiage the problems.default later. */}
+      <ProblemList problems={machineryItem.problems.default} />
     </SafeAreaView>
   );
 };

@@ -1,11 +1,11 @@
-import { useCallback, useState, memo, useEffect } from "react";
+import { memo, useState, useMemo } from "react";
 import {
-  Linking,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
   Platform,
+  Keyboard,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
@@ -13,7 +13,6 @@ import {
   Header,
   LargeHeader,
   SectionListWithHeaders,
-  ScrollViewWithHeaders,
 } from "@codeherence/react-native-header";
 import { StatusBar } from "expo-status-bar";
 import { Feather } from "@expo/vector-icons";
@@ -21,30 +20,25 @@ import Animated, {
   Extrapolation,
   interpolate,
   useAnimatedStyle,
-  useDerivedValue,
 } from "react-native-reanimated";
 import { BlurView } from "expo-blur";
 import MachineryCard from "../../../components/Home/MachineryCard";
-import machinery from "../../../db/machinery";
 import { useRouter } from "expo-router";
 import StyledSearchBar from "../../../components/Home/StyledSearchBar";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import machinery from "../../../db/machinery";
 
 const canUseBlurView =
   Platform.OS === "ios" ||
   (Platform.OS === "android" && Number(Platform.Version) >= 31);
 
 const ROOT_HORIZONTAL_PADDING = 12;
-const BLUE = "#1d9bf0";
 const DISABLED_COLOR = "rgba(255, 255, 255, 0.6)"; //White with 60% opacity
-const LIGHT_MODE_TEXT_COLOR = "#000"; //Black
-const LIGHT_MODE_BACKGROUND_COLOR = "#fff"; //White
 const DARK_MODE_TEXT_COLOR = "#fff"; //White
 const DARK_MODE_BACKGROUND_COLOR = "#000"; //Black
 const TRANSPARENT = "transparent";
 const LIGHT_GRAY = "lightgray";
 const DARK_BLUR_VIEW_BG = "rgba(0, 0, 0, 0.6)";
-const WARNING_COLOR = "rgba(255, 0, 0, 0.2)";
 
 const HeaderComponent = ({ showNavBar, scrollY }) => {
   const { left, right } = useSafeAreaInsets();
@@ -60,6 +54,7 @@ const HeaderComponent = ({ showNavBar, scrollY }) => {
 
     return { opacity: blurOpacity };
   });
+
   return (
     <View style={styles.smallHeaderContainer}>
       <Animated.View style={StyleSheet.absoluteFill}>
@@ -148,7 +143,7 @@ const LargeHeaderComponent = () => {
         <Text style={styles.title}>Welcome back,</Text>
         <Text style={styles.disabledText}>Kutay Kurt | 3rd Engineer</Text>
         <View style={styles.separator} />
-        <View style={styles.headerWarningListContainer}>
+        {/* <View style={styles.headerWarningListContainer}>
           <View style={styles.headerWarningContainer}>
             <Feather color="red" name="alert-triangle" size={18} />
             <Text style={styles.text}>
@@ -165,7 +160,7 @@ const LargeHeaderComponent = () => {
               information.
             </Text>
           </View>
-        </View>
+        </View> */}
       </View>
     </LargeHeader>
   );
@@ -177,49 +172,70 @@ const MachineryScreen = () => {
   const { bottom } = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const filteredMachinery = useMemo(() => {
+    if (!searchQuery) return machinery;
+
+    const filteredSections = machinery
+      .map((section) => ({
+        ...section,
+        data: section.data.filter((item) =>
+          item.name.toLowerCase().includes(searchQuery.toLowerCase())
+        ),
+      }))
+      .filter((section) => section.data.length > 0);
+
+    return filteredSections.length > 0 ? filteredSections : machinery;
+  }, [searchQuery]);
+
   return (
-    <>
+    <View
+      style={styles.container}
+      onStartShouldSetResponderCapture={() => {
+        Keyboard.dismiss();
+        return false;
+      }}
+    >
       <StatusBar style="light" />
       <SectionListWithHeaders
         HeaderComponent={HeaderComponent}
         LargeHeaderComponent={LargeHeaderComponent}
-        sections={machinery}
+        sections={filteredMachinery}
         disableAutoFixScroll
         ignoreLeftSafeArea
         ignoreRightSafeArea
         headerFadeInThreshold={0.2}
         disableLargeHeaderFadeAnim
-        style={[
-          styles.container,
-          {
-            // marginBottom: tabBarHeight + 20
-          },
+        style={styles.container}
+        contentContainerStyle={[
+          styles.contentContainer,
+          { paddingBottom: tabBarHeight },
         ]}
-        contentContainerStyle={[styles.contentContainer]}
         contentInsetAdjustmentBehavior="automatic"
         containerStyle={styles.rootContainer}
-        contentInset={{ bottom }}
-        renderItem={({ item }) => (
-          <MemoizedComponent
-            name={item.name}
-            description={item.description}
-            imageSource={{ uri: item.imageSource }}
-          />
-        )}
+        renderItem={({ item }) => <MemoizedComponent item={item} />}
         stickySectionHeadersEnabled
         renderSectionHeader={() => (
           <View style={styles.listHeaderContainer}>
             <View style={styles.listHeaderTopContainer}>
-              <StyledSearchBar placeholder="Search machinery..." />
+              <StyledSearchBar
+                placeholder="Search machinery..."
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
             </View>
           </View>
         )}
+        ListEmptyComponent={() => (
+          <View style={styles.emptyComponentContainer}>
+            <Text style={styles.emptyText}>No machinery found.</Text>
+          </View>
+        )}
       />
-      {/* 
-      //add a bottom padding to the screen to prevent the last item from being hidden behind the tab bar 
+      {/*
       <View style={{ height: tabBarHeight }} />
       */}
-    </>
+    </View>
   );
 };
 
@@ -254,10 +270,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     backgroundColor: DARK_MODE_BACKGROUND_COLOR,
-    flexGrow: 1,
   },
-  text: { color: DARK_MODE_TEXT_COLOR },
-  primaryText: { color: BLUE },
   rootContainer: {
     backgroundColor: DARK_MODE_BACKGROUND_COLOR,
     flex: 1,
@@ -271,15 +284,13 @@ const styles = StyleSheet.create({
   },
   listHeaderTopContainer: {},
   androidBlurViewBg: { backgroundColor: DARK_BLUR_VIEW_BG },
-  headerWarningContainer: {
-    backgroundColor: WARNING_COLOR,
-    borderRadius: 8,
-    padding: 12,
-    flexDirection: "row",
-    gap: 8,
+  emptyComponentContainer: {
     alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
   },
-  headerWarningListContainer: {
-    gap: 8,
+  emptyText: {
+    color: DISABLED_COLOR,
+    fontSize: 18,
   },
 });

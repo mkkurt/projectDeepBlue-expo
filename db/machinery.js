@@ -1,42 +1,97 @@
-export default machinery = [
+export default [
   {
     title: "Troubleshooting",
     data: [
       {
-        imageSource:
-          "https://res.cloudinary.com/seably/image/upload/ar_16:10,c_fill,q_auto,w_800/kyfxupuie453gihrphwb.jpeg",
+        id: "separator",
         name: "Separator",
         description: "Separator troubleshoooting",
+        uri: require("../assets/machinery-images/separator.png"),
+        problems: require("../db/separator.js"),
       },
       {
-        imageSource:
-          "https://detegasa.com/wp-content/uploads/2015/10/incinerator.png",
+        id: "incinerator",
         name: "Incinerator",
         description: "Incinerator troubleshoooting",
+        uri: require("../assets/machinery-images/incinerator.png"),
+        problems: require("../db/incinerator.js"),
       },
       {
-        imageSource:
-          "https://miro.medium.com/v2/resize:fit:425/0*TYAMHH2LF-QRfAkG.png",
+        id: "ows",
         name: "Oily Water Separator",
         description: "Oily Water Separator troubleshoooting",
+        uri: require("../assets/machinery-images/ows.png"),
+        problems: require("../db/ows.js"),
       },
       {
-        imageSource:
-          "https://res.cloudinary.com/seably/image/upload/ar_16:10,c_fill,q_auto,w_800/kyfxupuie453gihrphwb.jpeg",
-        name: "Separator",
-        description: "Separator troubleshoooting",
+        id: "compressor",
+        name: "Compressor",
+        description: "Compressor troubleshoooting",
+        uri: require("../assets/machinery-images/compressor.png"),
+        problems: require("../db/compressor.js"),
       },
       {
-        imageSource:
-          "https://detegasa.com/wp-content/uploads/2015/10/incinerator.png",
-        name: "Incinerator",
-        description: "Incinerator troubleshoooting",
+        id: "fwg-plate",
+        name: "Fresh Water Generator Plate Type",
+        description: "Fresh Water Generator Plate Type troubleshoooting",
+        uri: require("../assets/machinery-images/fwg-plate.png"),
+        problems: require("../db/fwg-plate.js"),
       },
       {
-        imageSource:
-          "https://miro.medium.com/v2/resize:fit:425/0*TYAMHH2LF-QRfAkG.png",
-        name: "Oily Water Separator",
-        description: "Oily Water Separator troubleshoooting",
+        id: "fwg-tube",
+        name: "Fresh Water Generator Tube Type",
+        description: "Fresh Water Generator Tube Type troubleshoooting",
+        uri: require("../assets/machinery-images/fwg-tube.png"),
+        problems: require("../db/fwg-tube.js"),
+      },
+      {
+        id: "refrigerator",
+        name: "Refrigerator",
+        description: "Refrigerator troubleshoooting",
+        uri: require("../assets/machinery-images/refrigerator.png"),
+        problems: require("../db/refrigerator.js"),
+      },
+      {
+        id: "sewage-gr",
+        name: "Sewage Treatment Plant Gravity",
+        description: "Sewage Treatment Plant Gravity Type troubleshoooting",
+        uri: require("../assets/machinery-images/sewage-gr.png"),
+        problems: require("../db/sewage-gr.js"),
+      },
+      {
+        id: "sewage-vc",
+        name: "Sewage Treatment Plant Vacuum",
+        description: "Sewage Treatment Plant Vacuum Type troubleshoooting",
+        uri: require("../assets/machinery-images/sewage-vc.png"),
+        problems: require("../db/sewage-vc.js"),
+      },
+      {
+        id: "st-gear",
+        name: "Steering Gear",
+        description: "Steering Gear troubleshoooting",
+        uri: require("../assets/machinery-images/st-gear.png"),
+        problems: require("../db/st-gear.js"),
+      },
+      {
+        id: "crane",
+        name: "Deck Crane",
+        description: "Deck Crane troubleshoooting",
+        uri: require("../assets/machinery-images/crane.png"),
+        problems: require("../db/crane.js"),
+      },
+      {
+        id: "windlass",
+        name: "Windlass",
+        description: "Windlass troubleshoooting",
+        uri: require("../assets/machinery-images/windlass.png"),
+        problems: require("../db/windlass.js"),
+      },
+      {
+        id: "governor",
+        name: "Hydraulic Governor",
+        description: "Hydraulic Governor troubleshoooting",
+        uri: require("../assets/machinery-images/governor.png"),
+        problems: require("../db/governor.js"),
       },
     ],
   },

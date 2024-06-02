@@ -1,9 +1,10 @@
+/* eslint-disable react-native/no-color-literals */
 import { SearchBar } from "react-native-elements";
 import { Keyboard, StyleSheet, View } from "react-native";
 import { useState } from "react";
 
 //change the style of the search bar and preserve the props
-export default StyledSearchBar = (props) => {
+export default function StyledSearchBar(props) {
   const [search, setSearch] = useState("");
   const onChangeText = (text) => {
     setSearch(text);
@@ -21,7 +22,7 @@ export default StyledSearchBar = (props) => {
       {...props}
     />
   );
-};
+}
 
 const styles = StyleSheet.create({
   searchBarContainer: {

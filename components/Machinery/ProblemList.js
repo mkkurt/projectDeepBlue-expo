@@ -1,3 +1,6 @@
+/* eslint-disable react-native/no-unused-styles */
+/* eslint-disable react-native/no-color-literals */
+/* eslint-disable react-native/no-single-element-style-arrays */
 import React from "react";
 import { FlatList, Text, StyleSheet, Pressable } from "react-native";
 import { useRouter, useGlobalSearchParams } from "expo-router";
