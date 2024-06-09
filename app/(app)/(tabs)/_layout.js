@@ -53,6 +53,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="ai/index"
         options={{
+          href: null, // For the representation
           title: "Tab AI",
           headerShown: false,
           tabBarIcon: ({ color }) => (
@@ -63,6 +64,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="livedata/index"
         options={{
+          href: null, // For the representation
           title: "Live Data",
           tabBarIcon: ({ color }) => <TabBarIcon name="signal" color={color} />,
         }}

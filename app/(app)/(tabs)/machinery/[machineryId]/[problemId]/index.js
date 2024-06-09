@@ -13,9 +13,9 @@ const ProblemId = () => {
     return data.find((machineryItem) => machineryItem.id === id);
   };
   const machineryItem = getMachineryById(machineryId);
-  const problems = machineryItem.problems.default;
+  const problems = machineryItem?.problems?.default;
 
-  const problem = problems.find((problem) => problem.name === problemId);
+  const problem = problems?.find((problem) => problem.name === problemId);
   return (
     <View>
       <Stack.Screen
@@ -24,7 +24,7 @@ const ProblemId = () => {
         }}
       />
       {/* <Text>{JSON.stringify(problem.reasons, null, 2)}</Text> */}
-      <SolutionList reasons={problem.reasons || problem.solutions} />
+      <SolutionList reasons={problem?.reasons || problem?.solutions} />
     </View>
   );
 };

@@ -97,22 +97,22 @@ const HeaderComponent = ({ showNavBar, scrollY }) => {
         headerCenterFadesIn={false}
         headerStyle={styles.headerStyle}
         noBottomBorder
-        headerRight={
-          <>
-            <TouchableOpacity
-              style={styles.backButtonContainer}
-              onPress={handleMorePress}
-            >
-              <Feather color="white" name="more-horizontal" size={18} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.backButtonContainer}
-              onPress={handleSearchPress}
-            >
-              <Feather color="white" name="search" size={18} />
-            </TouchableOpacity>
-          </>
-        }
+        // headerRight={
+        //   <>
+        //     <TouchableOpacity
+        //       style={styles.backButtonContainer}
+        //       onPress={handleMorePress}
+        //     >
+        //       <Feather color="white" name="more-horizontal" size={18} />
+        //     </TouchableOpacity>
+        //     <TouchableOpacity
+        //       style={styles.backButtonContainer}
+        //       onPress={handleSearchPress}
+        //     >
+        //       <Feather color="white" name="search" size={18} />
+        //     </TouchableOpacity>
+        //   </>
+        // }
         headerRightStyle={[
           styles.headerRightStyle,
           { paddingLeft: Math.max(right, ROOT_HORIZONTAL_PADDING) },
