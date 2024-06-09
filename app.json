@@ -16,7 +16,8 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.lmoonwolf.projectDeepBlueexpo"
     },
     "android": {
       "adaptiveIcon": {
@@ -34,6 +35,20 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "a41b0a3b-2dd2-45aa-915b-cd7136677b5f"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/a41b0a3b-2dd2-45aa-915b-cd7136677b5f"
     }
   }
 }

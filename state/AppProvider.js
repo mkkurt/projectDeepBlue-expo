@@ -1,34 +1,69 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { data } from "../db/machinery"; // Import your data
+import { data } from "../db/machinery";
 
+// -- Machinery Context --
 const MachineryContext = createContext({
-  machinery: [], // Initial empty state
-  isLoading: true, // Track loading status
+  machinery: [],
+  isLoading: true,
+  getMachineryById: (machineryId) => {},
 });
 
+// -- Authentication Context --
+const AuthContext = createContext({
+  user: null,
+  isLoggedIn: false,
+  login: (user) => {},
+  logout: () => {},
+});
+
+// -- Custom Hooks --
 export function useMachineryContext() {
   return useContext(MachineryContext);
 }
 
-export function MachineryProvider({ children }) {
+export function useAuth() {
+  return useContext(AuthContext);
+}
+
+export function AppProvider({ children }) {
+  // -- Machinery State --
   const [machinery, setMachinery] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // -- Authentication State --
+  const [user, setUser] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // -- Machinery Functions --
   const getMachineryById = (machineryId) => {
     return machinery.find((item) => item.id === machineryId);
   };
 
+  // -- Authentication Functions --
+  const login = (user) => {
+    setUser(user);
+    setIsLoggedIn(true);
+  };
+
+  const logout = () => {
+    setUser(null);
+    setIsLoggedIn(false);
+  };
+
+  // -- Effects --
   useEffect(() => {
-    // Load data when the component mounts (only once)
     setMachinery(data);
     setIsLoading(false);
-  }, []); // Empty dependency array ensures it runs only once
+  }, []);
 
+  // -- Provider --
   return (
-    <MachineryContext.Provider
-      value={{ machinery, isLoading, getMachineryById }}
-    >
-      {children}
-    </MachineryContext.Provider>
+    <AuthContext.Provider value={{ user, isLoggedIn, login, logout }}>
+      <MachineryContext.Provider
+        value={{ machinery, isLoading, getMachineryById }}
+      >
+        {children}
+      </MachineryContext.Provider>
+    </AuthContext.Provider>
   );
 }

@@ -1,0 +1,1796 @@
+
+**Project Structure:**
+```
+- app/
+  - (tabs)/
+    - _layout.js
+    - ai/
+      - index.js
+    - index.js
+    - livedata/
+      - index.js
+    - machinery/
+      - [machineryId]/
+        - [problemId]/
+          - _layout.js
+          - index.js
+        - _layout.js
+        - index.js
+      - _layout.js
+      - index.js
+  - _layout.js
+  - modal.js
+  - signin.js
+- components/
+  - Ai/
+    - Message.js
+    - Sources.js
+  - Home/
+    - MachineryCard.js
+    - SearchAiToggle.js
+    - StyledSearchBar.js
+    - TopHeader.js
+  - LiveData/
+    - ExhaustBarChart.js
+  - Machinery/
+    - ProblemList.js
+    - SolutionList.js
+- services/
+  - chatService.js
+  - dataService.js
+  - socket.js
+- state/
+  - AppProvider.js
+
+```
+
+**Dependencies:**
+```
+{
+  "@codeherence/react-native-header": "^0.12.0",
+  "@devvie/bottom-sheet": "^0.3.0",
+  "@expo/vector-icons": "^14.0.0",
+  "@react-navigation/native": "^6.0.2",
+  "@shopify/flash-list": "1.6.3",
+  "@tanstack/react-query": "^5.28.8",
+  "axios": "^1.6.8",
+  "eslint-plugin-react": "^7.34.1",
+  "expo": "~50.0.11",
+  "expo-asset": "~9.0.2",
+  "expo-blur": "~12.9.2",
+  "expo-font": "~11.10.3",
+  "expo-image": "~1.10.6",
+  "expo-linking": "~6.2.2",
+  "expo-router": "~3.4.8",
+  "expo-splash-screen": "~0.26.4",
+  "expo-status-bar": "~1.11.1",
+  "expo-system-ui": "~2.9.3",
+  "expo-web-browser": "~12.8.2",
+  "fuse.js": "^7.0.0",
+  "react": "18.2.0",
+  "react-dom": "18.2.0",
+  "react-native": "0.73.4",
+  "react-native-chart-kit": "^6.12.0",
+  "react-native-elements": "^3.4.3",
+  "react-native-keyboard-aware-scroll-view": "^0.9.5",
+  "react-native-reanimated": "~3.6.2",
+  "react-native-safe-area-context": "^4.8.2",
+  "react-native-screens": "~3.29.0",
+  "react-native-svg": "^15.1.0",
+  "react-native-web": "~0.19.6",
+  "@babel/core": "^7.20.0",
+  "@types/react": "~18.2.45",
+  "eslint": "^8.57.0",
+  "eslint-plugin-react-native": "^4.1.0",
+  "jest": "^29.2.1",
+  "jest-expo": "~50.0.3",
+  "react-test-renderer": "18.2.0",
+  "typescript": "^5.1.3"
+}
+```
+
+**Code Snippets:**
+```javascript
+// ----- ../../projectDeepBlue/projectDeepBlue-expo/app/(tabs)/_layout.js -----
+import React from "react";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { Tabs } from "expo-router";
+import Colors from "@/constants/Colors";
+
+function TabBarIcon(props) {
+  // eslint-disable-next-line react-native/no-inline-styles
+  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
+}
+
+export default function TabLayout() {
+  return (
+    <Tabs
+      safeAreaInsets={{
+        bottom: 0,
+        left: 0,
+        right: 0,
+        top: 0,
+      }}
+      screenOptions={{
+        tabBarShowLabel: false,
+        tabBarActiveTintColor: Colors.white,
+        tabBarInactiveTintColor: Colors.grey,
+        tabBarStyle: {
+          borderRadius: 30,
+          backgroundColor: Colors.black,
+          position: "absolute",
+          bottom: 30,
+          left: 20,
+          right: 20,
+          display: "flex",
+          height: 60,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+        },
+      }}
+    >
+      <Tabs.Screen
+        name="index"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="machinery"
+        options={{
+          title: "Tab Machinery",
+          headerShown: false,
+          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="ai/index"
+        options={{
+          title: "Tab AI",
+          headerShown: false,
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="microchip" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="livedata/index"
+        options={{
+          title: "Live Data",
+          tabBarIcon: ({ color }) => <TabBarIcon name="signal" color={color} />,
+        }}
+      />
+    </Tabs>
+  );
+}
+
+
+// ----- ../../projectDeepBlue/projectDeepBlue-expo/app/(tabs)/ai/index.js -----
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  TextInput,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  Text,
+  TouchableOpacity,
+  SafeAreaView,
+  StyleSheet,
+  Button,
+} from "react-native";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { useMutation } from "@tanstack/react-query";
+import fetchChatCompletion from "@/services/chatService";
+import Colors from "@/constants/Colors";
+import Message from "@/components/Ai/Message";
+
+const ChatScreen = () => {
+  const [inputText, setInputText] = useState("");
+  const [messages, setMessages] = useState([]);
+  const tabBarHeight = useBottomTabBarHeight();
+
+  const completionMutation = useMutation({
+    mutationFn: (messages) => fetchChatCompletion(messages),
+    retry: 0,
+    onError: (error) => {
+      //find the message with the key "loading" and replace it with the error message.
+      setMessages((prevMessages) => {
+        const loadingMessageIndex = prevMessages.findIndex(
+          (message) => message.key === "loading"
+        );
+        const newMessages = [...prevMessages];
+        newMessages[loadingMessageIndex] = {
+          role: "assistant",
+          content: error.message,
+        };
+        return newMessages;
+      });
+    },
+  });
+
+  //scroll to the end of the list when new messages are added.
+  const flatListRef = React.useRef();
+  useEffect(() => {
+    if (flatListRef.current) {
+      flatListRef.current.scrollToEnd({ animated: true });
+    }
+  }, [messages]);
+
+  //prevent the user from sending multiple messages in a row. The assistant should respond first.
+  //if the last message is from the user, disable the input.
+
+  useEffect(() => {
+    console.log("useEffect initiated for completionMutation");
+    if (completionMutation.isPending) {
+      console.log("pending");
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          role: "assistant",
+          content: "Loading...",
+          key: "loading",
+          created_at: new Date().toISOString(),
+        },
+      ]);
+    }
+    if (completionMutation.isSuccess) {
+      console.log("success");
+      setMessages((prevMessages) => {
+        const loadingMessageIndex = prevMessages.findIndex(
+          (message) => message.key === "loading"
+        );
+        const newMessages = [...prevMessages];
+        newMessages[loadingMessageIndex] = {
+          role: "assistant",
+          content: completionMutation.data.choices[0].message.content,
+          created_at: new Date().toISOString(),
+          sources: completionMutation.data.choices[0].sources,
+          sourcesFolded: true,
+        };
+        return newMessages;
+      });
+    }
+  }, [completionMutation.isPending, completionMutation.isSuccess]);
+
+  const handleSendMessage = () => {
+    if (inputText.trim() === "") {
+      return;
+    }
+
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      {
+        role: "user",
+        content: inputText,
+        sent: false,
+        created_at: new Date().toISOString(),
+      },
+    ]);
+    setInputText("");
+  };
+
+  //when setMessages is called, it will trigger the mutation.
+  useEffect(() => {
+    if (messages?.length > 0 && messages[messages.length - 1].sent === false) {
+      const filteredMessages = messages.filter(
+        (message) => message.role === "user" || message.role === "assistant"
+      );
+      completionMutation.mutate(filteredMessages);
+    }
+  }, [messages]);
+
+  return (
+    <SafeAreaView
+      style={[styles.safeArea, { marginBottom: tabBarHeight + 30 }]}
+    >
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : null}
+        style={styles.container}
+      >
+        <View style={styles.container}>
+          <Button title="Clear" onPress={() => setMessages([])} />
+          <FlatList
+            data={messages}
+            renderItem={({ item }) => (
+              <Message item={item} setMessages={setMessages} />
+            )}
+          />
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              value={inputText}
+              onChangeText={setInputText}
+              placeholder="Type your message..."
+              onSubmitEditing={() => handleSendMessage(inputText)}
+              blurOnSubmit={false}
+            />
+            <TouchableOpacity
+              onPress={handleSendMessage}
+              style={styles.sendButton}
+            >
+              <Text style={styles.sendButtonText}>Send</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
+  container: {
+    flex: 1,
+    padding: 10,
+  },
+  inputContainer: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  input: {
+    flex: 1,
+    height: 40,
+    borderColor: Colors.light.primary,
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingHorizontal: 10,
+  },
+  sendButton: {
+    marginLeft: 10,
+  },
+  sendButtonText: {
+    color: Colors.light.primary,
+  },
+});
+
+export default ChatScreen;
+
+
+// ----- ../../projectDeepBlue/projectDeepBlue-expo/app/(tabs)/index.js -----
+import { Redirect } from "expo-router";
+
+const Index = () => {
+  return <Redirect href="/machinery" />;
+};
+export default Index;
+
+
+// ----- ../../projectDeepBlue/projectDeepBlue-expo/app/(tabs)/livedata/index.js -----
+import { View, Text, StyleSheet } from "react-native";
+import Colors from "@/constants/Colors";
+import ExhaustBarChart from "@/components/LiveData/ExhaustBarChart";
+
+export default function LiveDataScreen() {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Exhaust Bar Chart</Text>
+      <ExhaustBarChart />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.white,
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: Colors.dark.text,
+  },
+});
+
+
+// ----- ../../projectDeepBlue/projectDeepBlue-expo/app/(tabs)/machinery/[machineryId]/[problemId]/_layout.js -----
+import React from "react";
+import { Stack, useNavigation } from "expo-router";
+import { StyleSheet, TouchableOpacity } from "react-native";
+import { Feather } from "@expo/vector-icons";
+
+export default function StackLayout() {
+  const navigation = useNavigation();
+
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: true,
+        headerLeft: () => (
+          <TouchableOpacity
+            style={styles.backButtonContainer}
+            onPress={() => navigation.goBack()}
+          >
+            <Feather name="arrow-left" size={24} color="white" />
+          </TouchableOpacity>
+        ),
+      }}
+    >
+      <Stack.Screen name="index" options={{}} />
+    </Stack>
+  );
+}
+const styles = StyleSheet.create({
+  backButtonContainer: {
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    borderRadius: 100,
+    padding: 7,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});
+
+
+// ----- ../../projectDeepBlue/projectDeepBlue-expo/app/(tabs)/machinery/[machineryId]/[problemId]/index.js -----
+import { View, Text } from "react-native";
+import { useGlobalSearchParams, useLocalSearchParams } from "expo-router";
+import { Stack } from "expo-router";
+import SolutionList from "../../../../../components/Machinery/SolutionList";
+import machinery from "../../../../../db/machinery";
+const data = machinery[0].data;
+
+const ProblemId = () => {
+  const { problemId } = useLocalSearchParams();
+  const { machineryId } = useGlobalSearchParams();
+
+  const getMachineryById = (id) => {
+    return data.find((machineryItem) => machineryItem.id === id);
+  };
+  const machineryItem = getMachineryById(machineryId);
+  const problems = machineryItem.problems.default;
+
+  const problem = problems.find((problem) => problem.name === problemId);
+  return (
+    <View>
+      <Stack.Screen
+        options={{
+          title: problemId,
+        }}
+      />
+      {/* <Text>{JSON.stringify(problem.reasons, null, 2)}</Text> */}
+      <SolutionList reasons={problem.reasons || problem.solutions} />
+    </View>
+  );
+};
+
+export default ProblemId;
+
+
+// ----- ../../projectDeepBlue/projectDeepBlue-expo/app/(tabs)/machinery/[machineryId]/_layout.js -----
+import React from "react";
+import { Stack, useNavigation } from "expo-router";
+import { StyleSheet, TouchableOpacity } from "react-native";
+import { Feather } from "@expo/vector-icons";
+
+export default function StackLayout() {
+  const navigation = useNavigation();
+
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: true,
+        headerLeft: () => (
+          <TouchableOpacity
+            style={styles.backButtonContainer}
+            onPress={() => navigation.goBack()}
+          >
+            <Feather name="arrow-left" size={24} color="white" />
+          </TouchableOpacity>
+        ),
+      }}
+    >
+      <Stack.Screen name="index" options={{}} />
+      <Stack.Screen
+        name="[problemId]"
+        options={{
+          headerShown: false,
+        }}
+      />
+    </Stack>
+  );
+}
+const styles = StyleSheet.create({
+  backButtonContainer: {
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    borderRadius: 100,
+    padding: 7,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});
+
+
+// ----- ../../projectDeepBlue/projectDeepBlue-expo/app/(tabs)/machinery/[machineryId]/index.js -----
+import { SafeAreaView, StyleSheet, Text } from "react-native";
+import { useEffect, useState } from "react";
+import { useGlobalSearchParams } from "expo-router";
+import ProblemList from "@/components/Machinery/ProblemList.js";
+import { Stack } from "expo-router";
+import { useMachineryContext } from "../../../../state/AppProvider";
+// import {data } from "../../../../db/machinery";
+//import the data as the data[0] which is the first item in the array:
+import machinery from "../../../../db/machinery";
+const data = machinery[0].data;
+
+const MachineryProblemsScreen = () => {
+  const { machineryId } = useGlobalSearchParams();
+
+  const getMachineryById = (id) => {
+    return data.find((machineryItem) => machineryItem.id === id);
+  };
+
+  const machineryItem = getMachineryById(machineryId);
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          headerTitle: machineryItem.name,
+        }}
+      />
+      {/* TODO: investiage the problems.default later. */}
+      <ProblemList problems={machineryItem.problems.default} />
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});
+
+export default MachineryProblemsScreen;
+
+
+// ----- ../../projectDeepBlue/projectDeepBlue-expo/app/(tabs)/machinery/_layout.js -----
+import { Stack } from "expo-router";
+
+export default function MachineryStackLayout() {
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <Stack.Screen name="index" options={{}} />
+      <Stack.Screen name="[machineryId]" options={{}} />
+    </Stack>
+  );
+}
+
+
+// ----- ../../projectDeepBlue/projectDeepBlue-expo/app/(tabs)/machinery/index.js -----
+import { memo, useState, useMemo } from "react";
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  Platform,
+  Keyboard,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  FadingView,
+  Header,
+  LargeHeader,
+  SectionListWithHeaders,
+} from "@codeherence/react-native-header";
+import { StatusBar } from "expo-status-bar";
+import { Feather } from "@expo/vector-icons";
+import Animated, {
+  Extrapolation,
+  interpolate,
+  useAnimatedStyle,
+} from "react-native-reanimated";
+import { BlurView } from "expo-blur";
+import MachineryCard from "../../../components/Home/MachineryCard";
+import { useRouter } from "expo-router";
+import StyledSearchBar from "../../../components/Home/StyledSearchBar";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import machinery from "../../../db/machinery";
+
+const canUseBlurView =
+  Platform.OS === "ios" ||
+  (Platform.OS === "android" && Number(Platform.Version) >= 31);
+
+const ROOT_HORIZONTAL_PADDING = 12;
+const DISABLED_COLOR = "rgba(255, 255, 255, 0.6)"; //White with 60% opacity
+const DARK_MODE_TEXT_COLOR = "#fff"; //White
+const DARK_MODE_BACKGROUND_COLOR = "#000"; //Black
+const TRANSPARENT = "transparent";
+const LIGHT_GRAY = "lightgray";
+const DARK_BLUR_VIEW_BG = "rgba(0, 0, 0, 0.6)";
+
+const HeaderComponent = ({ showNavBar, scrollY }) => {
+  const { left, right } = useSafeAreaInsets();
+  const router = useRouter();
+
+  const blurStyle = useAnimatedStyle(() => {
+    const blurOpacity = interpolate(
+      Math.abs(scrollY.value),
+      [0, 40],
+      [0, 1],
+      Extrapolation.CLAMP
+    );
+
+    return { opacity: blurOpacity };
+  });
+
+  return (
+    <View style={styles.smallHeaderContainer}>
+      <Animated.View style={StyleSheet.absoluteFill}>
+        <Animated.View>
+          <View>
+            {canUseBlurView ? (
+              <Animated.View
+                style={[StyleSheet.absoluteFill, styles.blurView, blurStyle]}
+              >
+                <BlurView
+                  style={StyleSheet.absoluteFill}
+                  intensity={50}
+                  tint="dark"
+                />
+              </Animated.View>
+            ) : (
+              <Animated.View
+                style={[
+                  StyleSheet.absoluteFill,
+                  styles.blurView,
+                  styles.androidBlurViewBg,
+                  blurStyle,
+                ]}
+              />
+            )}
+          </View>
+        </Animated.View>
+      </Animated.View>
+
+      <Header
+        showNavBar={showNavBar}
+        headerCenterFadesIn={false}
+        headerStyle={styles.headerStyle}
+        noBottomBorder
+        headerRight={
+          <>
+            <TouchableOpacity style={styles.backButtonContainer}>
+              <Feather color="white" name="more-horizontal" size={18} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.backButtonContainer}
+              onPress={() => {
+                //open the search modal
+                router.navigate("/modal");
+              }}
+            >
+              <Feather color="white" name="search" size={18} />
+            </TouchableOpacity>
+          </>
+        }
+        headerRightStyle={[
+          styles.headerRightStyle,
+          { paddingLeft: Math.max(right, ROOT_HORIZONTAL_PADDING) },
+        ]}
+        headerLeft={
+          <>
+            <FadingView opacity={showNavBar}>
+              <Text style={styles.navBarTitle}>Kutay Kurt</Text>
+              <Text style={styles.disabledSmallText}>3rd Engineer</Text>
+            </FadingView>
+          </>
+        }
+        headerLeftStyle={[
+          styles.headerLeftStyle,
+          { paddingLeft: Math.max(left, ROOT_HORIZONTAL_PADDING) },
+        ]}
+      />
+    </View>
+  );
+};
+
+const LargeHeaderComponent = () => {
+  const { left, right } = useSafeAreaInsets();
+
+  return (
+    <LargeHeader
+      headerStyle={[
+        styles.largeHeaderStyle,
+        {
+          paddingLeft: Math.max(left, ROOT_HORIZONTAL_PADDING),
+          paddingRight: Math.max(right, ROOT_HORIZONTAL_PADDING),
+        },
+      ]}
+    >
+      <View style={styles.profileHandleContainer}>
+        <Text style={styles.title}>Welcome back,</Text>
+        <Text style={styles.disabledText}>Kutay Kurt | 3rd Engineer</Text>
+        <View style={styles.separator} />
+        {/* <View style={styles.headerWarningListContainer}>
+          <View style={styles.headerWarningContainer}>
+            <Feather color="red" name="alert-triangle" size={18} />
+            <Text style={styles.text}>
+              There is a <Text style={styles.primaryText}>main engine</Text>{" "}
+              issue. Click <Text style={styles.primaryText}>here</Text> for more
+              information.
+            </Text>
+          </View>
+          <View style={styles.headerWarningContainer}>
+            <Feather color="red" name="alert-triangle" size={18} />
+            <Text style={styles.text}>
+              There is a <Text style={styles.primaryText}>main engine</Text>{" "}
+              issue. Click <Text style={styles.primaryText}>here</Text> for more
+              information.
+            </Text>
+          </View>
+        </View> */}
+      </View>
+    </LargeHeader>
+  );
+};
+
+const MemoizedComponent = memo(MachineryCard, () => true);
+
+const MachineryScreen = () => {
+  const { bottom } = useSafeAreaInsets();
+  const tabBarHeight = useBottomTabBarHeight();
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const filteredMachinery = useMemo(() => {
+    if (!searchQuery) return machinery;
+
+    const filteredSections = machinery
+      .map((section) => ({
+        ...section,
+        data: section.data.filter((item) =>
+          item.name.toLowerCase().includes(searchQuery.toLowerCase())
+        ),
+      }))
+      .filter((section) => section.data.length > 0);
+
+    return filteredSections.length > 0 ? filteredSections : machinery;
+  }, [searchQuery]);
+
+  return (
+    <View
+      style={styles.container}
+      onStartShouldSetResponderCapture={() => {
+        Keyboard.dismiss();
+        return false;
+      }}
+    >
+      <StatusBar style="light" />
+      <SectionListWithHeaders
+        HeaderComponent={HeaderComponent}
+        LargeHeaderComponent={LargeHeaderComponent}
+        sections={filteredMachinery}
+        disableAutoFixScroll
+        ignoreLeftSafeArea
+        ignoreRightSafeArea
+        headerFadeInThreshold={0.2}
+        disableLargeHeaderFadeAnim
+        style={styles.container}
+        contentContainerStyle={[
+          styles.contentContainer,
+          { paddingBottom: tabBarHeight },
+        ]}
+        contentInsetAdjustmentBehavior="automatic"
+        containerStyle={styles.rootContainer}
+        renderItem={({ item }) => <MemoizedComponent item={item} />}
+        stickySectionHeadersEnabled
+        renderSectionHeader={() => (
+          <View style={styles.listHeaderContainer}>
+            <View style={styles.listHeaderTopContainer}>
+              <StyledSearchBar
+                placeholder="Search machinery..."
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+            </View>
+          </View>
+        )}
+        ListEmptyComponent={() => (
+          <View style={styles.emptyComponentContainer}>
+            <Text style={styles.emptyText}>No machinery found.</Text>
+          </View>
+        )}
+      />
+      {/*
+      <View style={{ height: tabBarHeight }} />
+      */}
+    </View>
+  );
+};
+
+export default MachineryScreen;
+
+const styles = StyleSheet.create({
+  title: { fontSize: 24, fontWeight: "bold", color: DARK_MODE_TEXT_COLOR },
+  navBarTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: DARK_MODE_TEXT_COLOR,
+  },
+  largeHeaderStyle: {
+    flexDirection: "column",
+    gap: 12,
+  },
+  backButtonContainer: {
+    backgroundColor: DARK_MODE_BACKGROUND_COLOR,
+    borderRadius: 100,
+    padding: 7,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerStyle: { backgroundColor: TRANSPARENT },
+  smallHeaderContainer: { position: "relative", zIndex: 1 },
+  headerRightStyle: { gap: 6, paddingLeft: 12 },
+  headerLeftStyle: { gap: 12, paddingLeft: 12 },
+  blurView: { zIndex: 1 },
+  container: {
+    flex: 1,
+    backgroundColor: DARK_MODE_BACKGROUND_COLOR,
+  },
+  contentContainer: {
+    backgroundColor: DARK_MODE_BACKGROUND_COLOR,
+  },
+  rootContainer: {
+    backgroundColor: DARK_MODE_BACKGROUND_COLOR,
+    flex: 1,
+  },
+  disabledSmallText: { color: DISABLED_COLOR, fontSize: 12 },
+  disabledText: { color: DISABLED_COLOR, fontSize: 14 },
+  separator: { height: 1, backgroundColor: LIGHT_GRAY, marginVertical: 12 },
+  profileHandleContainer: { gap: 4 },
+  listHeaderContainer: {
+    backgroundColor: DARK_MODE_BACKGROUND_COLOR,
+  },
+  listHeaderTopContainer: {},
+  androidBlurViewBg: { backgroundColor: DARK_BLUR_VIEW_BG },
+  emptyComponentContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+  },
+  emptyText: {
+    color: DISABLED_COLOR,
+    fontSize: 18,
+  },
+});
+
+
+// ----- ../../projectDeepBlue/projectDeepBlue-expo/app/_layout.js -----
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { useFonts } from "expo-font";
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
+
+export {
+  // Catch any errors thrown by the Layout component.
+  ErrorBoundary,
+} from "expo-router";
+
+export const unstable_settings = {
+  // Ensure that reloading on `/modal` keeps a back button present.
+  initialRouteName: "(tabs)",
+};
+
+// Prevent the splash screen from auto-hiding before asset loading is complete.
+SplashScreen.preventAutoHideAsync();
+
+export default function RootLayout() {
+  const [loaded, error] = useFonts({
+    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    ...FontAwesome.font,
+  });
+
+  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
+  useEffect(() => {
+    if (error) throw error;
+  }, [error]);
+
+  useEffect(() => {
+    if (loaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded]);
+
+  if (!loaded) {
+    return null;
+  }
+
+  return <RootLayoutNav />;
+}
+
+const loggedIn = false;
+
+function RootLayoutNav() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Stack>
+        <Stack.Screen
+          name="(tabs)"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen name="modal" options={{ presentation: "modal" }} />
+        <Stack.Screen
+          name="signin"
+          options={{
+            headerShown: false,
+          }}
+        />
+      </Stack>
+    </QueryClientProvider>
+  );
+}
+
+
+// ----- ../../projectDeepBlue/projectDeepBlue-expo/app/modal.js -----
+import { Platform, StyleSheet, Text, View } from "react-native";
+import { Link, router } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+
+export default function Modal() {
+  // If the page was reloaded or navigated to directly, then the modal should be presented as
+  // a full screen page. You may need to change the UI to account for this.
+  const isPresented = router.canGoBack();
+  return (
+    <View style={styles.container}>
+      {/* Use `../` as a simple way to navigate to the root. This is not analogous to "goBack". */}
+      {!isPresented && <Link href="../">Dismiss</Link>}
+      {/* Native modals have dark backgrounds on iOS, set the status bar to light content. */}
+      <StatusBar style={Platform.OS === "ios" ? "light" : "dark"} />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  separator: {
+    marginVertical: 30,
+    height: 1,
+    width: "80%",
+  },
+});
+
+
+// ----- ../../projectDeepBlue/projectDeepBlue-expo/app/signin.js -----
+//app/signin.js
+import React, { Component } from "react";
+import { View, Text, TextInput, Button, StyleSheet } from "react-native";
+import { Link } from "expo-router";
+
+export default class SignIn extends Component {
+  state = {
+    username: "",
+    password: "",
+  };
+
+  handleSignIn = () => {
+    const { username, password } = this.state;
+    if (username === "admin" && password === "admin") {
+      alert("Sign in successful");
+    } else {
+      alert("Sign in failed");
+    }
+  };
+
+  render() {
+    const { username, password } = this.state;
+    return (
+      <View style={styles.container}>
+        <Text>Username</Text>
+        <TextInput
+          value={username}
+          onChangeText={(username) => this.setState({ username })}
+          style={styles.input}
+        />
+        <Text>Password</Text>
+        <TextInput
+          value={password}
+          onChangeText={(password) => this.setState({ password })}
+          style={styles.input}
+          secureTextEntry
+        />
+        <Button title="Sign In" onPress={this.handleSignIn} />
+        <Link href="/forgot-password">Forgot Password</Link>
+      </View>
+    );
+  }
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  input: {
+    height: 40,
+    width: "100%",
+    borderColor: "gray",
+    borderWidth: 1,
+    marginBottom: 20,
+  },
+});
+
+
+// ----- ../../projectDeepBlue/projectDeepBlue-expo/components/Ai/Message.js -----
+import { useEffect } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  FlatList,
+  StyleSheet,
+} from "react-native";
+import Sources from "./Sources";
+import Colors from "@/constants/Colors";
+
+export default function Message({ item, setMessages }) {
+  return (
+    <View
+      key={item.created_at}
+      style={[
+        styles.messageContainer,
+        item.role === "assistant" && styles.assistantMessageContainer,
+      ]}
+    >
+      <Text
+        style={[
+          styles.messageContent,
+          item.role === "assistant" && styles.assistantMessageContent,
+        ]}
+      >
+        {item.content.trim()}
+      </Text>
+      <Text
+        style={[
+          styles.messageDate,
+          item.role === "assistant" && styles.assistantMessageDate,
+        ]}
+      >
+        {item.created_at
+          ? new Date(item.created_at).toLocaleTimeString([], {
+              minute: "2-digit",
+              second: "2-digit",
+            })
+          : ""}
+      </Text>
+      {item.sources && (
+        <TouchableOpacity
+          onPress={() => {
+            setMessages((prevMessages) => {
+              const newMessages = [...prevMessages];
+              const sourceMessageIndex = newMessages.findIndex(
+                (message) => message.created_at === item.created_at
+              );
+              newMessages[sourceMessageIndex] = {
+                ...newMessages[sourceMessageIndex],
+                sourcesFolded: !newMessages[sourceMessageIndex].sourcesFolded,
+              };
+              return newMessages;
+            });
+          }}
+        >
+          <Text style={styles.showMore}>
+            {item.sourcesFolded ? "Show more" : "Show less"}
+          </Text>
+        </TouchableOpacity>
+      )}
+      {item.sourcesFolded ? null : (
+        <FlatList
+          data={item.sources}
+          renderItem={({ item, index }) => <Sources item={item} key={index} />}
+          keyExtractor={(item) => item.doc_id}
+        />
+      )}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  messageContainer: {
+    padding: 8,
+    backgroundColor: Colors.light.primary,
+    borderColor: Colors.light.primary,
+    borderRadius: 10,
+    borderWidth: 1,
+    margin: 6,
+    // display: "flex",
+    width: "80%",
+    alignSelf: "flex-end",
+  },
+  assistantMessageContainer: {
+    backgroundColor: Colors.light.secondary,
+    alignSelf: "flex-start",
+  },
+  messageContent: {
+    color: Colors.white,
+  },
+  assistantMessageContent: {
+    color: Colors.black,
+  },
+  messageDate: {
+    fontSize: 10,
+    color: Colors.light.secondary,
+    textAlign: "right",
+  },
+  assistantMessageDate: {
+    color: Colors.light.primary,
+  },
+  showMore: {
+    color: Colors.light.primary,
+    textAlign: "center",
+  },
+});
+
+
+// ----- ../../projectDeepBlue/projectDeepBlue-expo/components/Ai/Sources.js -----
+import { View, Text, StyleSheet } from "react-native";
+import Colors from "@/constants/Colors";
+
+export default function Sources({ item }) {
+  return (
+    <View key={item.doc_id} style={styles.sourceContainer}>
+      <Text style={styles.scoreHeader}>
+        Page {item.document.doc_metadata.page_label}
+        {"\n"}
+        Score: {item.score.toFixed(2) * 100}%
+      </Text>
+      <Text style={styles.scoreText}>
+        {item?.document?.doc_metadata?.window}
+      </Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  sourceContainer: {
+    padding: 8,
+    backgroundColor: Colors.light.secondary,
+    borderRadius: 10,
+    borderWidth: 1,
+    margin: 6,
+    width: "80%",
+    alignSelf: "flex-start",
+  },
+  scoreHeader: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: Colors.light.primary,
+  },
+  scoreText: {
+    fontSize: 12,
+    color: Colors.black,
+  },
+});
+
+
+// ----- ../../projectDeepBlue/projectDeepBlue-expo/components/Home/MachineryCard.js -----
+import React from "react";
+import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
+import { useRouter } from "expo-router";
+
+const BG_COLOR = "#FFFFFF";
+const SHADOW_COLOR = "#000";
+const TEXT_COLOR = "#555";
+
+const MachineryCard = ({ item }) => {
+  const router = useRouter();
+
+  const { id, name, description, uri } = item;
+
+  const handlePress = () => {
+    router.navigate(`machinery/${id}`);
+  };
+
+  return (
+    <TouchableOpacity
+      style={styles.container}
+      activeOpacity={0.8}
+      onPress={handlePress}
+    >
+      <Image source={uri} style={styles.image} resizeMode="cover" />
+      <View style={styles.detailsContainer}>
+        <Text style={styles.name}>{name}</Text>
+        <Text style={styles.description}>{description}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: BG_COLOR,
+    borderRadius: 8,
+    padding: 16,
+    margin: 8,
+    elevation: 2, // For Android elevation
+    shadowColor: SHADOW_COLOR,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  image: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+  },
+  detailsContainer: {
+    marginLeft: 16,
+  },
+  name: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+  description: {
+    fontSize: 14,
+    color: TEXT_COLOR,
+  },
+});
+
+export default MachineryCard;
+
+
+// ----- ../../projectDeepBlue/projectDeepBlue-expo/components/Home/SearchAiToggle.js -----
+const SearchAiToggle = () => {
+  return <div>SearchAiToggle</div>;
+};
+
+export default SearchAiToggle;
+
+
+// ----- ../../projectDeepBlue/projectDeepBlue-expo/components/Home/StyledSearchBar.js -----
+/* eslint-disable react-native/no-color-literals */
+import { SearchBar } from "react-native-elements";
+import { Keyboard, StyleSheet, View } from "react-native";
+import { useState } from "react";
+
+//change the style of the search bar and preserve the props
+export default function StyledSearchBar(props) {
+  const [search, setSearch] = useState("");
+  const onChangeText = (text) => {
+    setSearch(text);
+  };
+
+  const onFocus = () => {};
+
+  return (
+    <SearchBar
+      containerStyle={styles.searchBarContainer}
+      inputContainerStyle={styles.searchInputContainer}
+      onChangeText={onChangeText}
+      value={search}
+      onFocus={onFocus}
+      {...props}
+    />
+  );
+}
+
+const styles = StyleSheet.create({
+  searchBarContainer: {
+    backgroundColor: "black",
+    borderBottomColor: "transparent",
+    borderTopColor: "transparent",
+  },
+  searchInputContainer: {
+    backgroundColor: "#e1e1e1",
+    borderRadius: 10,
+  },
+});
+
+
+// ----- ../../projectDeepBlue/projectDeepBlue-expo/components/Home/TopHeader.js -----
+import React from "react";
+import {
+  Header,
+  LargeHeader,
+  ScalingView,
+} from "@codeherence/react-native-header";
+
+import { Text, View } from "react-native";
+import { SharedValue } from "react-native-reanimated";
+
+export const HeaderComponent = ({ showNavBar }) => (
+  <Header
+    showNavBar={showNavBar}
+    headerCenter={
+      <Text style={{ fontSize: 16, fontWeight: "bold" }}>
+        react-native-header
+      </Text>
+    }
+  />
+);
+
+export const LargeHeaderComponent = ({ scrollY }) => (
+  <LargeHeader>
+    <ScalingView scrollY={scrollY}>
+      <Text style={{ fontSize: 14 }}>Welcome!</Text>
+      <Text style={{ fontSize: 32, fontWeight: "bold" }}>
+        react-native-header
+      </Text>
+      <Text style={{ fontSize: 12, fontWeight: "normal", color: "#8E8E93" }}>
+        This project displays some header examples using the package.
+      </Text>
+    </ScalingView>
+  </LargeHeader>
+);
+
+
+// ----- ../../projectDeepBlue/projectDeepBlue-expo/components/LiveData/ExhaustBarChart.js -----
+import { View, Text, Dimensions, StyleSheet } from "react-native";
+import { BarChart } from "react-native-chart-kit";
+import { getData } from "@/services/dataService";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import Colors from "@/constants/Colors";
+
+export default function ExhaustBarChart() {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["data"],
+    queryFn: () => getData(),
+  });
+
+  useEffect(() => {
+    console.log(data);
+  }, [data]);
+
+  if (isLoading) {
+    return (
+      <View>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+  if (error) {
+    return (
+      <View>
+        <Text>Error: {error.message}</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      {data?.Cylinder && data?.Cylinder.length > 0 && (
+        <BarChart
+          yAxisSuffix="°C"
+          data={{
+            // labels: data?.Cylinder.map((item, index) => index + 1),
+            labels: data?.Cylinder.map((item, index) => "No. " + (index + 1)),
+            datasets: [
+              {
+                data: data?.Cylinder.map((item) => item.exhaustTemp),
+              },
+            ],
+          }}
+          fromZero
+          showValuesOnTopOfBars
+          withInnerLines={false}
+          width={Dimensions.get("window").width}
+          height={220}
+          chartConfig={{
+            backgroundColor: Colors.light.primary,
+            backgroundGradientFrom: Colors.light.primary,
+            backgroundGradientTo: Colors.light.primary,
+            decimalPlaces: 0,
+            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+            propsForVerticalLabels: {
+              fontSize: 10,
+              fontWeight: "bold",
+            },
+            propsForHorizontalLabels: {
+              fontWeight: "bold",
+            },
+            style: {},
+          }}
+        />
+      )}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.white,
+  },
+});
+
+
+// ----- ../../projectDeepBlue/projectDeepBlue-expo/components/Machinery/ProblemList.js -----
+/* eslint-disable react-native/no-unused-styles */
+/* eslint-disable react-native/no-color-literals */
+/* eslint-disable react-native/no-single-element-style-arrays */
+import React from "react";
+import { FlatList, Text, StyleSheet, Pressable } from "react-native";
+import { useRouter, useGlobalSearchParams } from "expo-router";
+
+const ProblemList = ({ problems }) => {
+  const router = useRouter();
+  const { machineryId } = useGlobalSearchParams();
+
+  const handlePress = (problem) => {
+    router.navigate(`machinery/${machineryId}/${problem.name}`);
+  };
+  const renderProblemItem = ({ item, index }) => {
+    return (
+      <Pressable
+        style={[styles.problemContainer]}
+        onPress={() => handlePress(item)}
+      >
+        <Text style={styles.problemName}>{item.name}</Text>
+      </Pressable>
+    );
+  };
+
+  return (
+    <FlatList
+      data={problems}
+      keyExtractor={(item) => item.name}
+      renderItem={renderProblemItem}
+    />
+  );
+};
+
+const styles = StyleSheet.create({
+  problemContainer: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+  },
+  problemName: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  reasonsContainer: {
+    marginLeft: 15,
+  },
+  reasonContainer: {
+    marginBottom: 5,
+  },
+  reasonName: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  solution: {
+    fontSize: 14,
+  },
+});
+
+export default ProblemList;
+
+
+// ----- ../../projectDeepBlue/projectDeepBlue-expo/components/Machinery/SolutionList.js -----
+/* eslint-disable react-native/no-inline-styles */
+/* eslint-disable react-native/no-color-literals */
+import React from "react";
+import { FlatList, Text, View, StyleSheet, Keyboard } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
+
+const SolutionList = ({ reasons }) => {
+  const renderReasonItem = ({ item }) => {
+    if (reasons[0]?.solutions || reasons[0]?.solution) {
+      return (
+        <View
+          style={styles.reasonContainer}
+          onPress={() => {
+            Keyboard.dismiss();
+          }}
+        >
+          <Text style={styles.reasonName}>{item.name}</Text>
+          <Text style={styles.solution}>
+            {item.solution || item.solutions?.join("\n") || ""}
+          </Text>
+        </View>
+      );
+    } else {
+      return (
+        <View
+          style={styles.solutionContainer}
+          onPress={() => {
+            Keyboard.dismiss();
+          }}
+        >
+          <MaterialIcons
+            name="lightbulb"
+            size={24}
+            color="black"
+            style={styles.icon}
+          />
+          <Text style={styles.reasonName}>{item.name}</Text>
+        </View>
+      );
+    }
+  };
+
+  return (
+    <FlatList
+      data={reasons}
+      keyExtractor={(item) => item.name}
+      renderItem={renderReasonItem}
+      style={{ marginTop: 10 }}
+      contentContainerStyle={styles.listContent}
+    />
+  );
+};
+
+const styles = StyleSheet.create({
+  listContent: {
+    paddingBottom: 20,
+  },
+  reasonContainer: {
+    marginHorizontal: 10,
+    marginVertical: 5,
+    padding: 15,
+    backgroundColor: "lightgray",
+    borderRadius: 10,
+  },
+  solutionContainer: {
+    marginHorizontal: 10,
+    marginVertical: 5,
+    padding: 15,
+    backgroundColor: "lightgray",
+    borderRadius: 10,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  icon: {
+    marginRight: 10,
+  },
+  reasonName: {
+    fontSize: 16,
+    fontWeight: "bold",
+    flexShrink: 1,
+  },
+  solution: {
+    fontSize: 14,
+    marginTop: 5,
+    color: "#333",
+  },
+});
+
+export default SolutionList;
+
+
+// ----- ../../projectDeepBlue/projectDeepBlue-expo/services/chatService.js -----
+import axios from "axios";
+
+const initialSystemMessage =
+  "You can only answer questions about the provided context. If you know the answer but it is not based in the provided context, don't provide the answer, just state the answer is not in the context provided. ";
+
+const fetchChatCompletion = async (messages) => {
+  console.log("fetchChatCompletion called with messages: ", messages);
+  try {
+    //only take the content and role of each message
+    messages = messages.map((message) => {
+      return {
+        role: message.role,
+        content: message.content,
+      };
+    });
+    //add the initial system message to the beginning of the messages array
+    messages = [
+      {
+        role: "system",
+        content: initialSystemMessage,
+      },
+      ...messages,
+    ];
+    console.log("sending messages", messages);
+    const requestBody = {
+      messages,
+      stream: false,
+      use_context: true,
+      // context_filter: {
+      //   document_ids: ["doc_id_1", "doc_id_2"],
+      // },
+    };
+
+    const response = await axios.post(
+      "http://localhost:8001/v1/chat/completions",
+      requestBody,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log(
+      "fetchChatCompletion response",
+      response.data.choices[0].message
+    );
+
+    return response.data;
+  } catch (error) {
+    console.log("fetchChatCompletion error", error.message);
+  }
+};
+
+export default fetchChatCompletion;
+
+
+// ----- ../../projectDeepBlue/projectDeepBlue-expo/services/dataService.js -----
+import axios from "axios";
+
+export const getData = async () => {
+  try {
+    const response = await axios.get("http://localhost:3000/data");
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};
+
+
+// ----- ../../projectDeepBlue/projectDeepBlue-expo/services/socket.js -----
+import { useState, useEffect } from "react";
+import { io } from "socket.io-client";
+
+// "undefined" means the URL will be computed from the `window.location` object
+const URL =
+  process.env.NODE_ENV === "production" ? undefined : "http://localhost:4000";
+
+export const socket = io(URL);
+
+function ConnectionState({ isConnected }) {
+  return <p>State: {"" + isConnected}</p>;
+}
+
+function ConnectionManager() {
+  function connect() {
+    socket.connect();
+  }
+
+  function disconnect() {
+    socket.disconnect();
+  }
+
+  return (
+    <>
+      <button onClick={connect}>Connect</button>
+      <button onClick={disconnect}>Disconnect</button>
+    </>
+  );
+}
+
+function MyForm() {
+  const [value, setValue] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  function onSubmit(event) {
+    event.preventDefault();
+    setIsLoading(true);
+
+    socket.timeout(5000).emit("create-something", value, () => {
+      setIsLoading(false);
+    });
+  }
+
+  return (
+    <form onSubmit={onSubmit}>
+      <input onChange={(e) => setValue(e.target.value)} />
+
+      <button type="submit" disabled={isLoading}>
+        Submit
+      </button>
+    </form>
+  );
+}
+
+function Events({ events }) {
+  return (
+    <ul>
+      {events.map((event, index) => (
+        <li key={index}>{event}</li>
+      ))}
+    </ul>
+  );
+}
+
+export default function SocketTest() {
+  const [isConnected, setIsConnected] = useState(socket.connected);
+  const [fooEvents, setFooEvents] = useState([]);
+
+  useEffect(() => {
+    function onConnect() {
+      setIsConnected(true);
+    }
+
+    function onDisconnect() {
+      setIsConnected(false);
+    }
+
+    function onFooEvent(value) {
+      setFooEvents((previous) => [...previous, value]);
+    }
+
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
+    socket.on("foo", onFooEvent);
+
+    return () => {
+      socket.off("connect", onConnect);
+      socket.off("disconnect", onDisconnect);
+      socket.off("foo", onFooEvent);
+    };
+  }, []);
+
+  return (
+    <div className="App">
+      <ConnectionState isConnected={isConnected} />
+      <Events events={fooEvents} />
+      <ConnectionManager />
+      <MyForm />
+    </div>
+  );
+}
+
+
+// ----- ../../projectDeepBlue/projectDeepBlue-expo/state/AppProvider.js -----
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { data } from "../db/machinery"; // Import your data
+
+const MachineryContext = createContext({
+  machinery: [], // Initial empty state
+  isLoading: true, // Track loading status
+});
+
+export function useMachineryContext() {
+  return useContext(MachineryContext);
+}
+
+export function MachineryProvider({ children }) {
+  const [machinery, setMachinery] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const getMachineryById = (machineryId) => {
+    return machinery.find((item) => item.id === machineryId);
+  };
+
+  useEffect(() => {
+    // Load data when the component mounts (only once)
+    setMachinery(data);
+    setIsLoading(false);
+  }, []); // Empty dependency array ensures it runs only once
+
+  return (
+    <MachineryContext.Provider
+      value={{ machinery, isLoading, getMachineryById }}
+    >
+      {children}
+    </MachineryContext.Provider>
+  );
+}
+
+```

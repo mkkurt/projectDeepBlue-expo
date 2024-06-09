@@ -36,7 +36,8 @@ export default function ExhaustBarChart() {
         <BarChart
           yAxisSuffix="°C"
           data={{
-            labels: data?.Cylinder.map((item, index) => index + 1),
+            // labels: data?.Cylinder.map((item, index) => index + 1),
+            labels: data?.Cylinder.map((item, index) => "No. " + (index + 1)),
             datasets: [
               {
                 data: data?.Cylinder.map((item) => item.exhaustTemp),
@@ -55,6 +56,13 @@ export default function ExhaustBarChart() {
             decimalPlaces: 0,
             color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
             labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+            propsForVerticalLabels: {
+              fontSize: 10,
+              fontWeight: "bold",
+            },
+            propsForHorizontalLabels: {
+              fontWeight: "bold",
+            },
             style: {},
           }}
         />

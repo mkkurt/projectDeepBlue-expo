@@ -3,10 +3,7 @@ import { useEffect, useState } from "react";
 import { useGlobalSearchParams } from "expo-router";
 import ProblemList from "@/components/Machinery/ProblemList.js";
 import { Stack } from "expo-router";
-import { useMachineryContext } from "../../../../state/AppProvider";
-// import {data } from "../../../../db/machinery";
-//import the data as the data[0] which is the first item in the array:
-import machinery from "../../../../db/machinery";
+import machinery from "../../../../../db/machinery";
 const data = machinery[0].data;
 
 const MachineryProblemsScreen = () => {

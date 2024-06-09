@@ -1,8 +1,8 @@
 import { View, Text } from "react-native";
 import { useGlobalSearchParams, useLocalSearchParams } from "expo-router";
 import { Stack } from "expo-router";
-import SolutionList from "../../../../../components/Machinery/SolutionList";
-import machinery from "../../../../../db/machinery";
+import SolutionList from "../../../../../../components/Machinery/SolutionList";
+import machinery from "../../../../../../db/machinery";
 const data = machinery[0].data;
 
 const ProblemId = () => {

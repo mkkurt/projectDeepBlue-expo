@@ -22,11 +22,11 @@ import Animated, {
   useAnimatedStyle,
 } from "react-native-reanimated";
 import { BlurView } from "expo-blur";
-import MachineryCard from "../../../components/Home/MachineryCard";
 import { useRouter } from "expo-router";
-import StyledSearchBar from "../../../components/Home/StyledSearchBar";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import machinery from "../../../db/machinery";
+import MachineryCard from "../../../../components/Home/MachineryCard";
+import StyledSearchBar from "../../../../components/Home/StyledSearchBar";
+import machinery from "../../../../db/machinery";
 
 const canUseBlurView =
   Platform.OS === "ios" ||
@@ -54,6 +54,14 @@ const HeaderComponent = ({ showNavBar, scrollY }) => {
 
     return { opacity: blurOpacity };
   });
+
+  const handleSearchPress = () => {
+    console.log("Search Pressed");
+  };
+
+  const handleMorePress = () => {
+    console.log("More Pressed");
+  };
 
   return (
     <View style={styles.smallHeaderContainer}>
@@ -91,15 +99,15 @@ const HeaderComponent = ({ showNavBar, scrollY }) => {
         noBottomBorder
         headerRight={
           <>
-            <TouchableOpacity style={styles.backButtonContainer}>
+            <TouchableOpacity
+              style={styles.backButtonContainer}
+              onPress={handleMorePress}
+            >
               <Feather color="white" name="more-horizontal" size={18} />
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.backButtonContainer}
-              onPress={() => {
-                //open the search modal
-                router.navigate("/modal");
-              }}
+              onPress={handleSearchPress}
             >
               <Feather color="white" name="search" size={18} />
             </TouchableOpacity>
