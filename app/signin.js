@@ -1,16 +1,18 @@
-// app/LoginScreen.js
+/* eslint-disable react-native/no-unused-styles */
+/* eslint-disable react-native/no-color-literals */
 import React, { useState } from "react";
 import {
+  StyleSheet,
   View,
   Text,
   TextInput,
-  Button,
-  StyleSheet,
   TouchableOpacity,
   Image,
   KeyboardAvoidingView,
   Platform,
+  Linking,
 } from "react-native";
+
 import { useAuth } from "../state/AppProvider";
 import { router } from "expo-router";
 
@@ -19,7 +21,7 @@ const credentials = {
   password: "admin",
 };
 
-export default function LoginScreen() {
+const SignInScreen = () => {
   const [username, setUsername] = useState("admin");
   const [password, setPassword] = useState("admin");
   const WAIT_TIME = 1000;
@@ -49,6 +51,7 @@ export default function LoginScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
+      {/* App Logo */}
       <Image
         source={require("../assets/images/icon.png")}
         style={styles.logo}
@@ -56,15 +59,15 @@ export default function LoginScreen() {
 
       <Text style={styles.title}>Marine Engineer Assistant</Text>
 
+      {/* Input Fields */}
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          placeholder="Email"
+          placeholder="Username"
           onChangeText={setUsername}
           value={username}
           keyboardType="email-address"
         />
-
         <TextInput
           style={styles.input}
           placeholder="Password"
@@ -74,16 +77,35 @@ export default function LoginScreen() {
         />
       </View>
 
+      {/* Sign In Button */}
       <TouchableOpacity style={styles.signInButton} onPress={handleLogin}>
         <Text style={styles.signInButtonText}>Sign In</Text>
       </TouchableOpacity>
 
-      {/* <TouchableOpacity style={styles.forgotPasswordLink}>
-        <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-      </TouchableOpacity> */}
+      {/* Developer Information */}
+
+      <View style={styles.developerInfoContainer}>
+        <View style={styles.developerRow}>
+          <Text style={styles.developerName}>Developed by: M. Kutay KURT</Text>
+          <TouchableOpacity
+            onPress={() => Linking.openURL("mailto:kutaykurt99@gmail.com")}
+          >
+            <Text style={styles.emailText}>kutaykurt99@gmail.com</Text>
+          </TouchableOpacity>
+        </View>
+        <Text style={styles.dataCredit}>
+          Data Source: Chief Eng. Kemal DEMİREL's Gemi Yardimci Makineleri II
+        </Text>
+        <Text style={styles.advisor}>
+          Thesis Supervisor: Ömer Berkehan İNAL
+        </Text>
+        <Text style={styles.university}>
+          Istanbul Technical University | Faculty of Maritime
+        </Text>
+      </View>
     </KeyboardAvoidingView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -126,10 +148,54 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontWeight: "bold",
   },
-  forgotPasswordLink: {
-    marginTop: 15,
+  developerInfo: {
+    position: "absolute",
+    bottom: 20,
+    alignItems: "center",
   },
-  forgotPasswordText: {
+  developerText: {
+    fontSize: 12,
+    color: "#555",
+  },
+  developerInfoContainer: {
+    position: "absolute",
+    bottom: 20,
+    alignItems: "center",
+    width: "80%", // Adjust width as needed
+  },
+  developerRow: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 5,
+  },
+  developerName: {
+    fontSize: 14, // Slightly larger font
+    fontWeight: "bold",
+    color: "#333", // Darker gray
+  },
+  emailText: {
+    fontSize: 14,
     color: "#1e90ff",
+    textDecorationLine: "underline",
+  },
+  dataCredit: {
+    fontSize: 12,
+    fontStyle: "italic",
+    fontWeight: "bold",
+    color: "#555",
+    textAlign: "center",
+  },
+  advisor: {
+    fontSize: 12,
+    fontWeight: "italic",
+    color: "#333",
+    textAlign: "center",
+  },
+  university: {
+    fontSize: 12,
+    color: "#555",
+    textAlign: "center",
   },
 });
+
+export default SignInScreen;

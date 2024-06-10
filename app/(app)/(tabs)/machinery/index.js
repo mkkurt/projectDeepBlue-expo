@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-unused-styles */
 import { memo, useState, useMemo } from "react";
 import {
   StyleSheet,
@@ -121,7 +122,7 @@ const HeaderComponent = ({ showNavBar, scrollY }) => {
           <>
             <FadingView opacity={showNavBar}>
               <Text style={styles.navBarTitle}>Kutay Kurt</Text>
-              <Text style={styles.disabledSmallText}>3rd Engineer</Text>
+              <Text style={styles.disabledSmallText}>Marine Engineer</Text>
             </FadingView>
           </>
         }
@@ -149,7 +150,7 @@ const LargeHeaderComponent = () => {
     >
       <View style={styles.profileHandleContainer}>
         <Text style={styles.title}>Welcome back,</Text>
-        <Text style={styles.disabledText}>Kutay Kurt | 3rd Engineer</Text>
+        <Text style={styles.disabledText}>Kutay Kurt | Marine Engineer</Text>
         <View style={styles.separator} />
         {/* <View style={styles.headerWarningListContainer}>
           <View style={styles.headerWarningContainer}>
