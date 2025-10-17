@@ -2,6 +2,14 @@
 
 A work-in-progress mobile application for Marine Engineers onboard, made with React Native - Expo.
 
+## 📱 Run on iPhone (Without Computer!)
+
+**New!** You can now run this app on your iPhone without needing your computer!
+
+👉 **[Quick Start Guide](./QUICKSTART.md)** - Get running in 30 minutes
+
+👉 **[Detailed Setup](./IPHONE_SETUP.md)** - Complete documentation
+
 ## Libraries Used
 
 - [Expo](https://expo.dev)
@@ -13,21 +21,18 @@ A work-in-progress mobile application for Marine Engineers onboard, made with Re
 
 ## Usage
 
+### Development with Computer
+
 ```bash
 git clone https://github.com/mkkurt/projectDeepBlue-expo.git
-```
-
-```bash
 cd projectDeepBlue-expo
-```
-
-```bash
 npm install
-```
-
-```bash
 npm run start
 ```
+
+### Run on iPhone (Without Computer)
+
+See [IPHONE_SETUP.md](./IPHONE_SETUP.md) for detailed instructions on how to build and run the app on your iPhone using Expo's cloud build service.
 
 ## Contributing
 
