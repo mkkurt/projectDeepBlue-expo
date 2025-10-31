@@ -17,6 +17,35 @@ import fetchChatCompletion from "@/services/chatService";
 import Colors from "@/constants/Colors";
 import Message from "@/components/Ai/Message";
 
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
+  container: {
+    flex: 1,
+    padding: 10,
+  },
+  inputContainer: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  input: {
+    flex: 1,
+    height: 40,
+    borderColor: Colors.light.primary,
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingHorizontal: 10,
+  },
+  sendButton: {
+    marginLeft: 10,
+  },
+  sendButtonText: {
+    color: Colors.light.primary,
+  },
+});
+
 const ChatScreen = () => {
   const [inputText, setInputText] = useState("");
   const [messages, setMessages] = useState([]);
@@ -149,34 +178,5 @@ const ChatScreen = () => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-    padding: 10,
-  },
-  inputContainer: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  input: {
-    flex: 1,
-    height: 40,
-    borderColor: Colors.light.primary,
-    borderWidth: 1,
-    borderRadius: 20,
-    paddingHorizontal: 10,
-  },
-  sendButton: {
-    marginLeft: 10,
-  },
-  sendButtonText: {
-    color: Colors.light.primary,
-  },
-});
 
 export default ChatScreen;

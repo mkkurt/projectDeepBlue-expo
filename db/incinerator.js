@@ -1,4 +1,4 @@
-export default problems = [
+const problems = [
   {
     name: "P1 No power (electricity).",
     reasons: [
@@ -516,3 +516,5 @@ export default problems = [
     ],
   },
 ];
+
+export default problems;

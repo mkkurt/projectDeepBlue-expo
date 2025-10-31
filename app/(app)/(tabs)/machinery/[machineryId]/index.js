@@ -1,5 +1,5 @@
-import { Keyboard, SafeAreaView, StyleSheet, Text } from "react-native";
-import { useEffect, useState } from "react";
+import { Keyboard, SafeAreaView, StyleSheet } from "react-native";
+import { useState } from "react";
 import { useGlobalSearchParams } from "expo-router";
 import ProblemList from "@/components/Machinery/ProblemList.js";
 import { Stack } from "expo-router";
@@ -8,6 +8,12 @@ import StyledSearchBar from "../../../../../components/Home/StyledSearchBar";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 
 const data = machinery[0].data;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});
 
 const MachineryProblemsScreen = () => {
   const { machineryId } = useGlobalSearchParams();
@@ -50,11 +56,5 @@ const MachineryProblemsScreen = () => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
 
 export default MachineryProblemsScreen;
