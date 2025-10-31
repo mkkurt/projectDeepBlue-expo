@@ -54,6 +54,11 @@ npm audit fix
 ### Security Vulnerabilities
 - **FIXED**: Updated axios from 1.6.8 to latest to fix SSRF and DoS vulnerabilities
 - **FIXED**: Updated other dependencies with known vulnerabilities
+- **REMAINING**: 3 low-severity vulnerabilities in Expo dependencies (require breaking changes to fix)
+  - These are in `@expo/cli` → `send` package
+  - Would require updating to Expo 54 (breaking change)
+  - Risk is low as these affect dev server only, not production build
+  - Recommendation: Plan Expo upgrade in next major version
 - Regularly run `npm audit` to check for new vulnerabilities
 
 ## Network Security
