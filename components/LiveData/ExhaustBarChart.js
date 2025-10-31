@@ -1,9 +1,16 @@
+import React, { useEffect } from "react";
 import { View, Text, Dimensions, StyleSheet } from "react-native";
 import { BarChart } from "react-native-chart-kit";
 import { getData } from "@/services/dataService";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
 import Colors from "@/constants/Colors";
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.white,
+  },
+});
 
 export default function ExhaustBarChart() {
   const { data, isLoading, error } = useQuery({
@@ -12,7 +19,9 @@ export default function ExhaustBarChart() {
   });
 
   useEffect(() => {
-    console.log(data);
+    if (data) {
+      console.warn("Data loaded:", data);
+    }
   }, [data]);
 
   if (isLoading) {
@@ -36,7 +45,6 @@ export default function ExhaustBarChart() {
         <BarChart
           yAxisSuffix="°C"
           data={{
-            // labels: data?.Cylinder.map((item, index) => index + 1),
             labels: data?.Cylinder.map((item, index) => "No. " + (index + 1)),
             datasets: [
               {
@@ -70,10 +78,3 @@ export default function ExhaustBarChart() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.white,
-  },
-});

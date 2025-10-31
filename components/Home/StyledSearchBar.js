@@ -1,9 +1,25 @@
-/* eslint-disable react-native/no-color-literals */
+import React, { useState } from "react";
 import { SearchBar } from "react-native-elements";
-import { Keyboard, StyleSheet, View } from "react-native";
-import { useState } from "react";
+import { StyleSheet } from "react-native";
+import Colors from "@/constants/Colors";
 
-//change the style of the search bar and preserve the props
+const SEARCH_CONTAINER_BG = Colors.black;
+const SEARCH_INPUT_BG = "#e1e1e1";
+const TRANSPARENT = "transparent";
+
+const styles = StyleSheet.create({
+  searchBarContainer: {
+    backgroundColor: SEARCH_CONTAINER_BG,
+    borderBottomColor: TRANSPARENT,
+    borderTopColor: TRANSPARENT,
+  },
+  searchInputContainer: {
+    backgroundColor: SEARCH_INPUT_BG,
+    borderRadius: 10,
+  },
+});
+
+// Change the style of the search bar and preserve the props
 export default function StyledSearchBar(props) {
   const [search, setSearch] = useState("");
   const onChangeText = (text) => {
@@ -23,15 +39,3 @@ export default function StyledSearchBar(props) {
     />
   );
 }
-
-const styles = StyleSheet.create({
-  searchBarContainer: {
-    backgroundColor: "black",
-    borderBottomColor: "transparent",
-    borderTopColor: "transparent",
-  },
-  searchInputContainer: {
-    backgroundColor: "#e1e1e1",
-    borderRadius: 10,
-  },
-});

@@ -5,33 +5,6 @@ import React from "react";
 import { FlatList, Text, StyleSheet, Pressable } from "react-native";
 import { useRouter, useGlobalSearchParams } from "expo-router";
 
-const ProblemList = ({ problems }) => {
-  const router = useRouter();
-  const { machineryId } = useGlobalSearchParams();
-
-  const handlePress = (problem) => {
-    router.navigate(`machinery/${machineryId}/${problem.name}`);
-  };
-  const renderProblemItem = ({ item, index }) => {
-    return (
-      <Pressable
-        style={[styles.problemContainer]}
-        onPress={() => handlePress(item)}
-      >
-        <Text style={styles.problemName}>{item.name}</Text>
-      </Pressable>
-    );
-  };
-
-  return (
-    <FlatList
-      data={problems}
-      keyExtractor={(item) => item.name}
-      renderItem={renderProblemItem}
-    />
-  );
-};
-
 const styles = StyleSheet.create({
   problemContainer: {
     padding: 10,
@@ -57,5 +30,33 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 });
+
+const ProblemList = ({ problems }) => {
+  const router = useRouter();
+  const { machineryId } = useGlobalSearchParams();
+
+  const handlePress = (problem) => {
+    router.navigate(`machinery/${machineryId}/${problem.name}`);
+  };
+  
+  const renderProblemItem = ({ item }) => {
+    return (
+      <Pressable
+        style={[styles.problemContainer]}
+        onPress={() => handlePress(item)}
+      >
+        <Text style={styles.problemName}>{item.name}</Text>
+      </Pressable>
+    );
+  };
+
+  return (
+    <FlatList
+      data={problems}
+      keyExtractor={(item) => item.name}
+      renderItem={renderProblemItem}
+    />
+  );
+};
 
 export default ProblemList;

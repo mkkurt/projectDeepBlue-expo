@@ -1,20 +1,6 @@
+import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import Colors from "@/constants/Colors";
-
-export default function Sources({ item }) {
-  return (
-    <View key={item.doc_id} style={styles.sourceContainer}>
-      <Text style={styles.scoreHeader}>
-        Page {item.document.doc_metadata.page_label}
-        {"\n"}
-        Score: {item.score.toFixed(2) * 100}%
-      </Text>
-      <Text style={styles.scoreText}>
-        {item?.document?.doc_metadata?.window}
-      </Text>
-    </View>
-  );
-}
 
 const styles = StyleSheet.create({
   sourceContainer: {
@@ -36,3 +22,18 @@ const styles = StyleSheet.create({
     color: Colors.black,
   },
 });
+
+export default function Sources({ item }) {
+  return (
+    <View key={item.doc_id} style={styles.sourceContainer}>
+      <Text style={styles.scoreHeader}>
+        Page {item.document.doc_metadata.page_label}
+        {"\n"}
+        Score: {item.score.toFixed(2) * 100}%
+      </Text>
+      <Text style={styles.scoreText}>
+        {item?.document?.doc_metadata?.window}
+      </Text>
+    </View>
+  );
+}
