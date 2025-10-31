@@ -65,13 +65,16 @@ This document summarizes the comprehensive modernization effort to make Project 
 | expo-constants | - | 18.0.10 (added) |
 
 ### React Native Packages
-| Package | Old Version | New Version |
-|---------|------------|-------------|
-| react-native-reanimated | 3.10.1 | 4.1.3 |
-| react-native-screens | 3.31.1 | 4.18.0 |
-| react-native-safe-area-context | 4.10.1 | 5.6.2 |
-| react-native-svg | 15.2.0 | 15.14.0 |
-| react-native-web | 0.19.10 | 0.21.2 |
+| Package | Old Version | New Version | Notes |
+|---------|------------|-------------|-------|
+| react-native-reanimated | 3.10.1 | 4.1.3 | |
+| react-native-worklets | - | 2.0.0 | Added as peer dependency |
+| react-native-screens | 3.31.1 | 4.18.0 | |
+| react-native-safe-area-context | 4.10.1 | 5.6.2 | |
+| react-native-svg | 15.2.0 | 15.14.0 | |
+| react-native-web | 0.19.10 | 0.21.2 | |
+
+> **Note on react-native-worklets**: This package is a required peer dependency for both `react-native-reanimated@4.x` and `@codeherence/react-native-header`. It provides the worklets runtime needed for performant animations.
 
 ### Third-Party Libraries
 | Package | Old Version | New Version |
