@@ -1,0 +1,25 @@
+# Dependencies
+node_modules
+.expo
+.expo-shared
+dist
+build
+coverage
+
+# Build outputs
+*.log
+*.lock
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode
+.idea
+*.swp
+*.swo
+
+# Generated files
+package-lock.json
+yarn.lock
