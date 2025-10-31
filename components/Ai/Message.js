@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -8,6 +8,41 @@ import {
 } from "react-native";
 import Sources from "./Sources";
 import Colors from "@/constants/Colors";
+
+const styles = StyleSheet.create({
+  messageContainer: {
+    padding: 8,
+    backgroundColor: Colors.light.primary,
+    borderColor: Colors.light.primary,
+    borderRadius: 10,
+    borderWidth: 1,
+    margin: 6,
+    width: "80%",
+    alignSelf: "flex-end",
+  },
+  assistantMessageContainer: {
+    backgroundColor: Colors.light.secondary,
+    alignSelf: "flex-start",
+  },
+  messageContent: {
+    color: Colors.white,
+  },
+  assistantMessageContent: {
+    color: Colors.black,
+  },
+  messageDate: {
+    fontSize: 10,
+    color: Colors.light.secondary,
+    textAlign: "right",
+  },
+  assistantMessageDate: {
+    color: Colors.light.primary,
+  },
+  showMore: {
+    color: Colors.light.primary,
+    textAlign: "center",
+  },
+});
 
 export default function Message({ item, setMessages }) {
   return (
@@ -63,46 +98,10 @@ export default function Message({ item, setMessages }) {
       {item.sourcesFolded ? null : (
         <FlatList
           data={item.sources}
-          renderItem={({ item, index }) => <Sources item={item} key={index} />}
-          keyExtractor={(item) => item.doc_id}
+          renderItem={({ item: source, index }) => <Sources item={source} key={index} />}
+          keyExtractor={(source) => source.doc_id}
         />
       )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  messageContainer: {
-    padding: 8,
-    backgroundColor: Colors.light.primary,
-    borderColor: Colors.light.primary,
-    borderRadius: 10,
-    borderWidth: 1,
-    margin: 6,
-    // display: "flex",
-    width: "80%",
-    alignSelf: "flex-end",
-  },
-  assistantMessageContainer: {
-    backgroundColor: Colors.light.secondary,
-    alignSelf: "flex-start",
-  },
-  messageContent: {
-    color: Colors.white,
-  },
-  assistantMessageContent: {
-    color: Colors.black,
-  },
-  messageDate: {
-    fontSize: 10,
-    color: Colors.light.secondary,
-    textAlign: "right",
-  },
-  assistantMessageDate: {
-    color: Colors.light.primary,
-  },
-  showMore: {
-    color: Colors.light.primary,
-    textAlign: "center",
-  },
-});

@@ -1,29 +1,27 @@
 //.eslintrc
 {
-  // "extends": "airbnb",
+  "extends": ["eslint:recommended", "plugin:react/recommended"],
   "rules": {
-    "no-console": 0,
-    "no-alert": 0,
-    "no-underscore-dangle": 0,
-    "no-param-reassign": 0,
-    "no-use-before-define": 0,
-    "no-unused-vars": 0,
-    "no-shadow": 0,
-    "no-restricted-syntax": 0,
-    "no-prototype-builtins": 0,
-    "no-plusplus": 0,
-    "no-continue": 0,
-    "no-restricted-globals": 0,
-    "no-undef": 0,
-    "no-else-return": 0,
-    "no-useless-escape": 0,
-    "no-restricted-properties": 0,
-    "react-native/no-unused-styles": 2,
-    "react-native/split-platform-components": 2,
-    "react-native/no-inline-styles": 2,
-    "react-native/no-color-literals": 2,
-    "react-native/no-raw-text": 2,
-    "react-native/no-single-element-style-arrays": 2
+    // Console and debugging
+    "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "no-alert": "warn",
+    
+    // Code quality
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "no-use-before-define": ["error", { "functions": false, "classes": true, "variables": true }],
+    "no-shadow": "warn",
+    
+    // React Native specific
+    "react-native/no-unused-styles": "error",
+    "react-native/split-platform-components": "warn",
+    "react-native/no-inline-styles": "error",
+    "react-native/no-color-literals": "error",
+    "react-native/no-raw-text": "error",
+    "react-native/no-single-element-style-arrays": "error",
+    
+    // React
+    "react/prop-types": "off", // Consider enabling if not using TypeScript
+    "react/display-name": "off"
   },
   "plugins": ["react", "react-native"],
   "parserOptions": {
@@ -34,6 +32,13 @@
     }
   },
   "env": {
-    "react-native/react-native": true
+    "react-native/react-native": true,
+    "es6": true,
+    "node": true
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
   }
 }
