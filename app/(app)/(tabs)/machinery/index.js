@@ -41,6 +41,60 @@ const TRANSPARENT = "transparent";
 const LIGHT_GRAY = "lightgray";
 const DARK_BLUR_VIEW_BG = "rgba(0, 0, 0, 0.6)";
 
+const styles = StyleSheet.create({
+  title: { fontSize: 24, fontWeight: "bold", color: DARK_MODE_TEXT_COLOR },
+  navBarTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: DARK_MODE_TEXT_COLOR,
+  },
+  largeHeaderStyle: {
+    flexDirection: "column",
+    gap: 12,
+  },
+  backButtonContainer: {
+    backgroundColor: DARK_MODE_BACKGROUND_COLOR,
+    borderRadius: 100,
+    padding: 7,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerStyle: { backgroundColor: TRANSPARENT },
+  smallHeaderContainer: { position: "relative", zIndex: 1 },
+  headerRightStyle: { gap: 6, paddingLeft: 12 },
+  headerLeftStyle: { gap: 12, paddingLeft: 12 },
+  blurView: { zIndex: 1 },
+  container: {
+    flex: 1,
+    backgroundColor: DARK_MODE_BACKGROUND_COLOR,
+  },
+  contentContainer: {
+    backgroundColor: DARK_MODE_BACKGROUND_COLOR,
+  },
+  rootContainer: {
+    backgroundColor: DARK_MODE_BACKGROUND_COLOR,
+    flex: 1,
+  },
+  disabledSmallText: { color: DISABLED_COLOR, fontSize: 12 },
+  disabledText: { color: DISABLED_COLOR, fontSize: 14 },
+  separator: { height: 1, backgroundColor: LIGHT_GRAY, marginVertical: 12 },
+  profileHandleContainer: { gap: 4 },
+  listHeaderContainer: {
+    backgroundColor: DARK_MODE_BACKGROUND_COLOR,
+  },
+  listHeaderTopContainer: {},
+  androidBlurViewBg: { backgroundColor: DARK_BLUR_VIEW_BG },
+  emptyComponentContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+  },
+  emptyText: {
+    color: DISABLED_COLOR,
+    fontSize: 18,
+  },
+});
+
 const HeaderComponent = ({ showNavBar, scrollY }) => {
   const { left, right } = useSafeAreaInsets();
   const router = useRouter();
@@ -249,57 +303,3 @@ const MachineryScreen = () => {
 };
 
 export default MachineryScreen;
-
-const styles = StyleSheet.create({
-  title: { fontSize: 24, fontWeight: "bold", color: DARK_MODE_TEXT_COLOR },
-  navBarTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: DARK_MODE_TEXT_COLOR,
-  },
-  largeHeaderStyle: {
-    flexDirection: "column",
-    gap: 12,
-  },
-  backButtonContainer: {
-    backgroundColor: DARK_MODE_BACKGROUND_COLOR,
-    borderRadius: 100,
-    padding: 7,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  headerStyle: { backgroundColor: TRANSPARENT },
-  smallHeaderContainer: { position: "relative", zIndex: 1 },
-  headerRightStyle: { gap: 6, paddingLeft: 12 },
-  headerLeftStyle: { gap: 12, paddingLeft: 12 },
-  blurView: { zIndex: 1 },
-  container: {
-    flex: 1,
-    backgroundColor: DARK_MODE_BACKGROUND_COLOR,
-  },
-  contentContainer: {
-    backgroundColor: DARK_MODE_BACKGROUND_COLOR,
-  },
-  rootContainer: {
-    backgroundColor: DARK_MODE_BACKGROUND_COLOR,
-    flex: 1,
-  },
-  disabledSmallText: { color: DISABLED_COLOR, fontSize: 12 },
-  disabledText: { color: DISABLED_COLOR, fontSize: 14 },
-  separator: { height: 1, backgroundColor: LIGHT_GRAY, marginVertical: 12 },
-  profileHandleContainer: { gap: 4 },
-  listHeaderContainer: {
-    backgroundColor: DARK_MODE_BACKGROUND_COLOR,
-  },
-  listHeaderTopContainer: {},
-  androidBlurViewBg: { backgroundColor: DARK_BLUR_VIEW_BG },
-  emptyComponentContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 20,
-  },
-  emptyText: {
-    color: DISABLED_COLOR,
-    fontSize: 18,
-  },
-});

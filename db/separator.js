@@ -1,4 +1,4 @@
-export default problems = [
+const problems = [
   {
     name: "Vibrations in Separator.",
     reasons: [
@@ -627,3 +627,5 @@ export default problems = [
     ],
   },
 ];
+
+export default problems;

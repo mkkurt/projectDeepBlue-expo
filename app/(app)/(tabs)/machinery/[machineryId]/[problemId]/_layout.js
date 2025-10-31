@@ -2,6 +2,17 @@ import React from "react";
 import { Stack, useNavigation } from "expo-router";
 import { StyleSheet, TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import Colors from "@/constants/Colors";
+
+const styles = StyleSheet.create({
+  backButtonContainer: {
+    backgroundColor: Colors.overlay,
+    borderRadius: 100,
+    padding: 7,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});
 
 export default function StackLayout() {
   const navigation = useNavigation();
@@ -24,12 +35,3 @@ export default function StackLayout() {
     </Stack>
   );
 }
-const styles = StyleSheet.create({
-  backButtonContainer: {
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
-    borderRadius: 100,
-    padding: 7,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
